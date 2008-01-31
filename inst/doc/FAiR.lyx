@@ -1,0 +1,3676 @@
+#LyX 1.5.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
+\begin_document
+\begin_header
+\textclass literate-article
+\begin_preamble
+% Meta information - fill between {} and do not remove %
+% \VignetteIndexEntry{Factor Analysis in R}
+% \VignetteDepends{FAiR}
+% \VignetteKeywords{models, multivariate}
+% \VignettePackage{FAiR}
+\usepackage{fullpage}
+\usepackage{times}
+\end_preamble
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize default
+\spacing single
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Pop-Up Menus in FA
+\begin_inset Formula $i$
+\end_inset
+
+R
+\end_layout
+
+\begin_layout Author
+Ben Goodrich
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+This vignette is intended to be a quick reference that defines terms and
+ illustrates how to use the pop-up menus.
+ Large parts will not make a great deal of sense outside the introduction
+ to SEFA and lexical optimization in Goodrich (2008a) and its (unwritten)
+ extension to EFA in Goodrich (2008b).
+\end_layout
+
+\begin_layout Standard
+\begin_inset LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\newpage
+
+\end_layout
+
+\begin_layout Section
+Notation
+\end_layout
+
+\begin_layout Standard
+Some notation is provided so that the reader can refer back to it.
+ For simplicity, I do not distinguish the notation for a population parameter
+ from the notation for an estimate of that population parameter here.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $n$
+\end_inset
+
+ is the number of outcome variables
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times n$
+\end_inset
+
+ correlation matrix among outcomes in the sample
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $r_{1}\geq1$
+\end_inset
+
+ is the number of factors (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times r_{1}$
+\end_inset
+
+ primary pattern matrix (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Phi}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ correlation matrix among primary factors (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Theta}^{2}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times n$
+\end_inset
+
+ diagonal covariance matrix among unique factors (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbb{E}\left[\mathbf{S}\right]=\mathbf{C}=\boldsymbol{\beta\Phi\beta}^{\prime}+\boldsymbol{\Theta}^{2}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times n$
+\end_inset
+
+ expectation of 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+ as a function of parameters (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Pi}=\boldsymbol{\beta\boldsymbol{\Phi}}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times r_{1}$
+\end_inset
+
+ primary structure matrix (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Gamma}=\boldsymbol{\beta}\times\boldsymbol{\Pi}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times r_{1}$
+\end_inset
+
+ factor contribution matrix (at the first level) where 
+\begin_inset Formula $\times$
+\end_inset
+
+ indicates element-by-element multiplication rather than matrix multiplication
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{D}^{-2}=\textrm{Diag}\left(\boldsymbol{\Phi}^{-1}\right)$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ diagonal of the inverse of the correlation matrix among primary factors
+ (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{D}=\left[\mathbf{D}^{-2}\right]^{-\frac{1}{2}}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ correlation matrix between primary and reference factors (at the first
+ level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Psi}=\mathbf{D}\boldsymbol{\Phi}^{-1}\mathbf{D}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ correlation matrix among reference factors (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Upsilon}=\boldsymbol{\beta}\mathbf{D}$
+\end_inset
+
+ is the 
+\begin_inset Formula $n\times r_{1}$
+\end_inset
+
+ reference structure matrix (at the first level)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $r_{2}\geq0$
+\end_inset
+
+ is the number of second-order factors
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{2}$
+\end_inset
+
+ second-order primary pattern matrix
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{2}\times r_{2}$
+\end_inset
+
+ correlation matrix among second-order primary factors
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Omega}^{2}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ diagonal covariance matrix among second-order unique factors
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Phi}=\boldsymbol{\Delta\Xi\Delta}^{\prime}+\boldsymbol{\Omega}^{2}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ second-order equation for the primary factors as a function of second-order
+ parameters
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\digamma}=\boldsymbol{\Delta}\boldsymbol{\Xi}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{2}\times r_{1}$
+\end_inset
+
+ primary structure matrix at the second level
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\Game}=\boldsymbol{\Delta}\times\boldsymbol{\digamma}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{2}\times r_{1}$
+\end_inset
+
+ factor contribution matrix at the second level where 
+\begin_inset Formula $\times$
+\end_inset
+
+ indicates element-by-element multiplication rather than matrix multiplication
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{Z}^{-2}=\textrm{Diag}\left(\boldsymbol{\Xi}^{-1}\right)$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{2}\times r_{2}$
+\end_inset
+
+ diagonal of the inverse of the correlation matrix among primary factors
+ at the second level
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\mathbf{Z}=\left[\mathbf{Z}^{-2}\right]^{-\frac{1}{2}}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{2}\times r_{2}$
+\end_inset
+
+ correlation matrix between primary and reference factors at the second
+ level
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $\boldsymbol{\mho}=\boldsymbol{\Delta}\mathbf{Z}$
+\end_inset
+
+ is the 
+\begin_inset Formula $r_{1}\times r_{2}$
+\end_inset
+
+ reference structure matrix at the second level
+\end_layout
+
+\begin_layout Section
+SEFA or CFA via 
+\family typewriter
+Factanal()
+\end_layout
+
+\begin_layout Standard
+To start this sequence, I typed the command 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+
+\backslash
+ 
+\backslash
+Rcode{mental.tests <- Factanal(covmat = Harman74.cor, factors = 5, model =
+ "SEFA")}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Simultaneous Second-Order Model
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $r_{1}\geq3$
+\end_inset
+
+, the user will be asked whether to estimate a simultaneous second-order
+ model, which decomposes the correlation matrix among first-order primary
+ factors as a function of fewer second-order factors.
+ For example, some people define ``general intelligence'' to be the second-order
+ factor that drives various first-order (primary) mental abilities.
+ If a second-order model is estimated, and if 
+\begin_inset Formula $r_{1}\geq5$
+\end_inset
+
+, the user will be asked how many second-order factors 
+\begin_inset Formula $\left(r_{2}\right)$
+\end_inset
+
+ to extract.
+ 
+\end_layout
+
+\begin_layout Standard
+If a second-order model is specified, the tasks are to set bounds on the
+ correlations among second-order factors (if 
+\begin_inset Formula $r_{2}\geq2$
+\end_inset
+
+), to fix values of the second-order coefficients (for CFA and mixed SEFA
+ models), to set bounds on the second-order coefficients, and to choose
+ a mapping rule for the second-order coefficients (if 
+\begin_inset Formula $r_{2}\geq2$
+\end_inset
+
+ in a SEFA model).
+\end_layout
+
+\begin_layout Subsubsection
+Deciding on a Simultaneous Second-Order Model
+\begin_inset LatexCommand label
+name "sub:2nd"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Simultaneous Second-Order Model with 
+\begin_inset Formula $r_{2}=2$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:simultaneous"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/simultaneous/simultaneous.gif
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+Figure 
+\begin_inset LatexCommand ref
+reference "fig:simultaneous"
+
+\end_inset
+
+ shows two dialog boxes.
+ First, the user is asked whether to estimate a simultaneous second-order
+ model.
+ If the user were to choose ``No'' at this point, there would be no second-order
+ model and the user would then be asked about bounds on the off-diagonals
+ of 
+\begin_inset Formula $\boldsymbol{\Phi}$
+\end_inset
+
+.
+ Such a dialog would be similar to that in section 
+\begin_inset LatexCommand ref
+reference "sub:2nd_bounds_cor"
+
+\end_inset
+
+, except that ``level 2'' would be replaced by ``level 1''.
+ Then the dialog would cut directly to that described in section 
+\begin_inset LatexCommand ref
+reference "sub:1st"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+For the sake of completeness, I will assume that the user answered ``Yes''
+ to the question of whether a simultaneous second-order model should be
+ estimated.
+ At this point, the dialog asks the user to specify the value of 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $r_{1}=3$
+\end_inset
+
+ or 
+\begin_inset Formula $r_{1}=4$
+\end_inset
+
+, then 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ can only be one.
+ If 
+\begin_inset Formula $r_{1}\geq5$
+\end_inset
+
+, then 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ can be two.
+ If 
+\begin_inset Formula $r_{1}\geq6$
+\end_inset
+
+, then 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ can be three.
+ Rarely would one need to estimate a model with larger numbers for 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+.
+ I will assume that the user has chosen 
+\begin_inset Formula $r_{2}=2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Bounds on the Correlations Among the Primary Factors 
+\begin_inset Formula $\left(\boldsymbol{\Xi}\right)$
+\end_inset
+
+ at Level 2
+\begin_inset LatexCommand label
+name "sub:2nd_bounds_cor"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Slightly Limiting the Bounds on the Correlation Between Second-Order Primary
+ Factors
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:bounds_Xi"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/simultaneous/bounds.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+The next menu asks about bounds on the off-diagonals of 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+, as shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:bounds_Xi"
+
+\end_inset
+
+.
+ If 
+\begin_inset Formula $r_{2}\leq1$
+\end_inset
+
+, this question would not be asked.
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+ is constrained to be a positive definite correlation matrix, the off-diagonals
+ cannot exceed 
+\begin_inset Formula $\pm1$
+\end_inset
+
+.
+ It is possible, but often not necessary, to impose stricter bounds.
+ Occasionally, there can be optimization difficulties if any correlation
+ gets too close to 
+\begin_inset Formula $\pm1$
+\end_inset
+
+, and in that case the user may want to narrow the acceptable interval to
+ 
+\begin_inset Formula $\left(-0.9,0.9\right)$
+\end_inset
+
+ or so.
+\end_layout
+
+\begin_layout Standard
+If ``No'' is chosen, the dialog will skip to section 
+\begin_inset LatexCommand ref
+reference "sub:peg2"
+
+\end_inset
+
+ using the 
+\begin_inset Formula $\left(-1,1\right)$
+\end_inset
+
+ interval for all correlations among second-order factors.
+ For the sake of completeness, I will assume the user answers ``Yes'' to
+ this question.
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+ is a correlation matrix, the diagonal elements are constrained to be 
+\begin_inset Formula $1.0$
+\end_inset
+
+ and the diagonal elements will be ignored if they are changed.
+ Since a correlation matrix is symmetric, it is not necessary to change
+ the values below the diagonal and they will be ignored regardless.
+ It is only necessary to specify the values above the diagonal.
+ In this case, I have specified a lower bound of 
+\begin_inset Formula $-0.9$
+\end_inset
+
+ on the only correlation among the two primary factors at level 2, which
+ is a very conservative choice.
+ 
+\end_layout
+
+\begin_layout Standard
+When satisfied with the lower-bounds on the off-diagonals of 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+, click the 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ at the top right (or 
+\begin_inset Quotes eld
+\end_inset
+
+Quit
+\begin_inset Quotes erd
+\end_inset
+
+, but 
+\begin_inset Quotes eld
+\end_inset
+
+Quit
+\begin_inset Quotes erd
+\end_inset
+
+ does not appear in the Windows version).
+ Once 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is pressed, the process is repeated for the upper bounds on the off-diagonals
+ of 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Specifying Values of the Primary Pattern Matrix 
+\begin_inset Formula $\left(\boldsymbol{\Delta}\right)$
+\end_inset
+
+ at Level 2
+\begin_inset LatexCommand label
+name "sub:peg2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+(Not) Pegging Coefficients to Specified Values
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:peg2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/simultaneous/fish/fish.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Specifying Informative Bounds on Primary Pattern Coefficients at Level 2
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:bounds_Delta"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/simultaneous/fish/bounds/bounds.gif
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+Since this example is a SEFA, the next dialog (shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:peg2"
+
+\end_inset
+
+) asks the user whether any elements of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ should be pegged to specific values.
+ If a CFA model were estimated, this question would not appear because it
+ is obligatory to peg some elements of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ in a CFA model.
+ In a SEFA model, it is possible to answer ``No'' to this question in order
+ to estimate a 
+\begin_inset Quotes eld
+\end_inset
+
+pure
+\begin_inset Quotes erd
+\end_inset
+
+ SEFA model.
+ However, for illustrative purposes, I will assume that the user answers
+ ``Yes'' to estimate a ``mixed SEFA'' model.
+\end_layout
+
+\begin_layout Standard
+At this point, the user should change the appropriate cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ from NA to numbers.
+ For example, the user might change the first row to 
+\begin_inset Formula $\begin{bmatrix}1.0 & 0.0\end{bmatrix}$
+\end_inset
+
+ to make the first factor at the second level collinear with the first factor
+ at the first level.
+ Any elements of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ that are to be 
+\emph on
+unrestricted
+\emph default
+ should be left as NA.
+\end_layout
+
+\begin_layout Standard
+If a CFA model were being estimated, it would be necessary to specify restrictio
+ns on 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ to satisfy the theorem on rotational indeterminancy in Howe (1955).
+ Namely there should be at least 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ zeros in each column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ such that all 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ submatrices of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ with zeros in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ are of rank 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In this case, a mixed SEFA model is being estimated, so it is possible to
+ specify fewer cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ including no restricted cells at all.
+ Here I assume the user has changed his or her mind about restrictions on
+ 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ and now wants all cells to be unrestricted.
+ Thus, all cells remain NA.
+\end_layout
+
+\begin_layout Subsubsection
+Bounds on Cells of the Primary Pattern Matrix 
+\begin_inset Formula $\left(\boldsymbol{\Delta}\right)$
+\end_inset
+
+ at Level 2
+\begin_inset LatexCommand label
+name "sub:2nd_bounds_fish"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The next question is what bounds should be placed on the cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+.
+ The dialog shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:bounds_Delta"
+
+\end_inset
+
+ is similar to that in section 
+\begin_inset LatexCommand ref
+reference "sub:2nd_bounds_cor"
+
+\end_inset
+
+, except that the bounds are being placed on the cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ rather than the off-diagonals of 
+\begin_inset Formula $\boldsymbol{\Xi}$
+\end_inset
+
+.
+ It is always possible to select ``No'', but doing so does not make the
+ cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ unbounded.
+ Rather, fairly wide bounds are used, in particular 
+\begin_inset Formula $\pm1.5$
+\end_inset
+
+.
+ In some cases, it may be necessary to specify wider bounds, but in most
+ cases if the user answers ``Yes'', it would be to narrow the bounds.
+\end_layout
+
+\begin_layout Standard
+If the user specifies bounds, the number chosen in the next dialog fills
+ every free cell of the subsequent editable menu.
+ The fixed coefficients, if any, would be filled with their values.
+ The user can then edit particular cells as necessary.
+ Here I have changed both cells in the first row to 
+\begin_inset Formula $-0.2$
+\end_inset
+
+ to permit a more diffuse positive manifold for the first second-order factor.
+\end_layout
+
+\begin_layout Standard
+It should be emphasized that it is possible for coefficients to be less
+ than 
+\begin_inset Formula $-1.0$
+\end_inset
+
+ when 
+\begin_inset Formula $r_{2}>1$
+\end_inset
+
+.
+ The decision here to limit the cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ to be greater than 
+\begin_inset Formula $-0.2$
+\end_inset
+
+ or 
+\begin_inset Formula $-0.1$
+\end_inset
+
+ is a 
+\emph on
+substantive
+\emph default
+ constraint that can be wrong and can be tested.
+ If strong bounds are used, it may be best to specify 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{boundary.enforcement = 2}
+\end_layout
+
+\end_inset
+
+ in the call to 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{Factanal}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+When finished, press 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+Quit
+\begin_inset Quotes erd
+\end_inset
+
+ but 
+\begin_inset Quotes eld
+\end_inset
+
+Quit
+\begin_inset Quotes erd
+\end_inset
+
+ does not appear on the Windows version), to repeat this procedure for the
+ upper bounds on the cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+.
+ It is necessary that some of the valid intervals for the cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ include zero so that the Howe (1955) theorem can be satisfied in a SEFA
+ model.
+ It is difficult to generally prove when inequality restrictions on coefficients
+ are sufficient to eliminate rotational indeterminacy, so the Howe (1955)
+ theorem is recommended.
+\end_layout
+
+\begin_layout Subsubsection
+Mapping Rules for the Primary Pattern Matrix 
+\begin_inset Formula $\left(\boldsymbol{\Delta}\right)$
+\end_inset
+
+ at Level 2
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Mapping Rules at Level 2 in a SEFA
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:map2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/simultaneous/fish/SEFA/SEFA.gif
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+In the SEFA model presumed here, the questions shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:map2"
+
+\end_inset
+
+ are very important and pertain to the mapping rule used to squash certain
+ cells of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ to zero.
+ If a CFA model were being estimated, this question would not appear because
+ the Howe (1955) theorem must be satisfied by 
+\emph on
+a priori
+\emph default
+ restrictions.
+ Let 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ be the number of zeros required for the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+.
+ Most of the mapping rules at the second level are defined on the reference
+ structure matrix 
+\begin_inset Formula $\left(\check{\boldsymbol{\mho}}\right)$
+\end_inset
+
+ and the factor contribution matrix 
+\begin_inset Formula $\left(\check{\boldsymbol{\Game}}\right)$
+\end_inset
+
+, rather than the primary pattern matrix (
+\begin_inset Formula $\check{\boldsymbol{\Delta}}$
+\end_inset
+
+), where the supra-check indicates a prelimary matrix that is constructed
+ by filling the free elments with 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ (in symbols) or 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{par}
+\end_layout
+
+\end_inset
+
+ (in R syntax).
+ By ``smallest'', I always mean in absolute value.
+ The distinctions between mapping rules are fairly minor in this case when
+ 
+\begin_inset Formula $r_{2}=2$
+\end_inset
+
+, but are defined in general as follows:
+\end_layout
+
+\begin_layout Itemize
+``No, I just want plain zeros''.
+ This mapping rule simply squashes the 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ smallest elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\check{\boldsymbol{\mho}}$
+\end_inset
+
+ to zero, implying that 
+\begin_inset Formula $\boldsymbol{\Delta}_{p}$
+\end_inset
+
+ has 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ zeros.
+\end_layout
+
+\begin_layout Itemize
+``Encourage cohyperplanrity (revisionist Yates 1987)''.
+ This mapping rule squashes 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ using the following piecewise function 
+\begin_inset Formula $\forall q\neq p$
+\end_inset
+
+:
+\begin_inset Formula \begin{eqnarray*}
+\Delta_{jp} & = & \begin{cases}
+0 & \textrm{if}\,\,\check{\Game}_{jq}-\check{\Game}_{jq}=\max\left\{ \check{\boldsymbol{\Game}}_{q}-\check{\boldsymbol{\Game}}_{p}\right\} \\
+\check{\Delta}_{jp} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+which tends to place a zero in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ at the row where the factor contribution of some other column is large
+ for each of the remaining columns.
+\end_layout
+
+\begin_layout Itemize
+``
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ `outcomes' (really primary factors) of complexity 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ for each factor (weaker Thurstone)''.
+ This mapping rule is similar to the ``plain zeros'' mapping rule in that
+ 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ small elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\check{\boldsymbol{\mho}}$
+\end_inset
+
+ are squashed to zero, except that there is an additional stipulation that
+ no ``outcome'' (really primary factor) is of complexity less than 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ where the complexity of the 
+\begin_inset Formula $j$
+\end_inset
+
+th ``outcome'' (primary factor) is the number of non-zeros in 
+\begin_inset Formula $\boldsymbol{\mho}_{j}$
+\end_inset
+
+.
+ However, any ``non-zero'' coefficient can be arbitrarily close to zero.
+ Thus, each column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ will have 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ 
+\emph on
+exact
+\emph default
+ zeros.
+\end_layout
+
+\begin_layout Itemize
+``Unit complexity basis (revisionist Butler 1969)''.
+ This mapping rule uses the dishinguishability weights defined in Yates
+ (1987) to select 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ primary factors that are of unit complexity.
+ In particular, let
+\begin_inset Formula \begin{eqnarray*}
+\check{w}_{p} & = & \frac{1}{\sum\check{\Game}_{\centerdot\centerdot}}\sum_{j=1}^{r_{1}}\check{\Game}_{jp}\end{eqnarray*}
+
+\end_inset
+
+where 
+\begin_inset Formula $\sum\check{\Game}_{\centerdot\centerdot}=\sum_{j=1}^{r_{1}}\sum_{p=1}^{r_{2}}\check{\Game}_{jp}$
+\end_inset
+
+ is the weight applied the the 
+\begin_inset Formula $p$
+\end_inset
+
+th second-order factor such that 
+\begin_inset Formula $\sum_{p=1}^{r_{2}}w_{p}=1$
+\end_inset
+
+.
+ This equation is similar to equation 
+\begin_inset Formula $118$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+145).
+ Then let
+\begin_inset Formula \begin{eqnarray*}
+\check{c}_{j} & = & \frac{\sum_{p=1}^{r_{2}}\check{w}_{p}\check{\Delta}_{jp}}{\sum_{p=1}^{r_{2}}\check{\Game}_{jp}}\end{eqnarray*}
+
+\end_inset
+
+be the directional cosine between 
+\begin_inset Formula $\check{\boldsymbol{\Delta}}_{j}$
+\end_inset
+
+ and the (weighted) centroid of 
+\begin_inset Formula $\check{\boldsymbol{\Delta}}$
+\end_inset
+
+, which is the same as equation 
+\begin_inset Formula $119$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+145).
+ Finally, let 
+\begin_inset Formula \begin{eqnarray*}
+d_{j}^{w} & = & \min\left\{ 1,\frac{\left(r_{2}\right)^{2}}{r_{2}-1}\check{c}_{j}\left(\check{c}_{j}-1\right)\right\} \end{eqnarray*}
+
+\end_inset
+
+be the distinguishability weight for 
+\begin_inset Formula $\check{\boldsymbol{\Delta}}_{j}$
+\end_inset
+
+, which is the same as equation 
+\begin_inset Formula $78a$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+112).
+ Then, 
+\begin_inset Formula $\forall p$
+\end_inset
+
+ choose a first-order factor to be of unit complexity among first-order
+ factors where 
+\begin_inset Formula $\check{\Game}_{jp}=\max\left\{ \boldsymbol{\check{\Game}}_{j}\right\} $
+\end_inset
+
+ such that 
+\begin_inset Formula $d_{j}^{w}$
+\end_inset
+
+ is maximal.
+ For such first-order factors, squash 
+\begin_inset Formula $\boldsymbol{\Delta}_{j}$
+\end_inset
+
+ to zero 
+\begin_inset Formula $\forall q\neq p$
+\end_inset
+
+.
+ At the end of these steps, there will be 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ first-order factors that are collinear with the second-order primary axes
+ and there will be 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ zeros in each column of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Set the maximum complexity for each outcome.
+\begin_inset Quotes erd
+\end_inset
+
+ This mapping rule is similar to the ``plain zeros'' mapping rule, except
+ that it is applied to each 
+\emph on
+row
+\emph default
+ of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ rather than the columns.
+ In general, 
+\begin_inset Formula $\forall j$
+\end_inset
+
+, the user can choose a number between 
+\begin_inset Formula $1$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{2}$
+\end_inset
+
+ for the maximum number of non-zero coefficients in 
+\begin_inset Formula $\boldsymbol{\Delta}_{j}$
+\end_inset
+
+.
+ More details on this mapping rule are given in section X.
+\end_layout
+
+\begin_layout Standard
+In some cases, 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ may be greater than the number of zeros created by whichever mapping rule
+ is chosen.
+ In that case, the remaining zeros are filled in by squashing the 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ smallest elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of the 
+\emph on
+recalculated
+\emph default
+ reference structure matrix after the mapping rule has been applied and
+ some reference structure correlations are zero.
+ Thus, it is necessary to specify 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+, and the dialog box for doing so is also shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:map2"
+
+\end_inset
+
+.
+ By default, the user is asked whether to set 
+\begin_inset Formula $b_{p}=r_{2}\,\forall p$
+\end_inset
+
+, which can be accepted by answering ``Yes'' to the following question but
+ here I answer ``No'' to specify
+\series bold
+ 
+\series default
+
+\begin_inset Formula $b_{p}=r_{2}-1\,\forall p$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This concludes the dialog boxes for the second-order model.
+\end_layout
+
+\begin_layout Subsection
+First-Order Model
+\begin_inset LatexCommand label
+name "sub:1st"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The tasks are to set bounds on the correlations among first-order factors
+ (if a second-order model is not estimated), to fix values of the first-order
+ coefficients (for CFA and mixed SEFA models), to set bounds on the first-order
+ coefficients, and to choose a mapping rule for the first-order coefficients
+ (if 
+\begin_inset Formula $r_{2}\geq2$
+\end_inset
+
+ in a SEFA model).
+\end_layout
+
+\begin_layout Standard
+Note that if there is no second-order model, the user will be asked about
+ bounds on the off-diagonals of 
+\begin_inset Formula $\boldsymbol{\Phi}$
+\end_inset
+
+.
+ This dialog is similar to that in section 
+\begin_inset LatexCommand ref
+reference "sub:2nd_bounds_cor"
+
+\end_inset
+
+, except that ``level 2'' is replaced by ``level 1'' in the prompts.
+\end_layout
+
+\begin_layout Subsubsection
+Specifying Values of the Primary Pattern Matrix 
+\begin_inset Formula $\left(\boldsymbol{\beta}\right)$
+\end_inset
+
+ at Level 1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+(Not) Specifying Values for the Primary Pattern Coefficients at Level 1
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:pegs1"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/firstorder/pegs/pegs.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+Since this example is a SEFA, the dialog shown in figure 
+\begin_inset LatexCommand ref
+reference "fig:pegs1"
+
+\end_inset
+
+ asks the user whether any elements of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ should be pegged to specific values.
+ If a CFA model were estimated, this question would not appear because it
+ is obligatory to peg some elements of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ in a CFA model.
+ In a SEFA model, it is possible to answer ``No'' to this question to estimate
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+pure
+\begin_inset Quotes erd
+\end_inset
+
+ SEFA model.
+ However, for illustrative purposes, I will assume that the user answers
+ ``Yes'' to estimate a 
+\begin_inset Quotes eld
+\end_inset
+
+mixed
+\begin_inset Quotes erd
+\end_inset
+
+ SEFA model.
+\end_layout
+
+\begin_layout Standard
+At this point, the user should change the appropriate cells of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ from NA to numbers.
+ For example, the user might change the first row to 
+\begin_inset Formula $\begin{bmatrix}\textrm{NA} & 0.0 & 0.0 & 0.0 & 0.0\end{bmatrix}$
+\end_inset
+
+ to make the first factor collinear with visual perceptiveness.
+ Any elements of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ that are 
+\emph on
+unrestricted
+\emph default
+ should be left as NA.
+ Continuing this example, by leaving the first factor unrestricted for the
+ visual perception test, the user allows the test to have measurement error.
+ 
+\end_layout
+
+\begin_layout Standard
+If a CFA model were being estimated, it would be necessary to specify restrictio
+ns on 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ to satisfy the theorem on rotational indeterminancy in Howe (1955).
+ Namely there should be at least 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+ zeros in each column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ such that all 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ submatrices of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ with zeros in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ are of rank 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In this case, a SEFA model is being estimated, so it is possible to specify
+ fewer cells of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ including no restricted cells at all.
+ Here I assume the user has changed his or her mind about restrictions on
+ 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ and now wants all cells to be unrestricted.
+ Thus, all cells are left as NA.
+\end_layout
+
+\begin_layout Subsubsection
+Bounds on Cells of the Primary Pattern Matrix 
+\begin_inset Formula $\left(\boldsymbol{\beta}\right)$
+\end_inset
+
+ at Level 1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Specifying Bounds on the Primary Pattern Coefficients at Level 1
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:bounds1"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/firstorder/bounds/bounds.gif
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+The next question is what bounds should be placed on the cells of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+.
+ The dialog in figure is similar to that in section 
+\begin_inset LatexCommand ref
+reference "sub:2nd_bounds_fish"
+
+\end_inset
+
+, except that the bounds are being placed on the cells of the primary pattern
+ matrix at level 1 
+\begin_inset Formula $\left(\boldsymbol{\beta}\right)$
+\end_inset
+
+ rather than the primary pattern matrix at level 2 
+\begin_inset Formula $\left(\boldsymbol{\Delta}\right)$
+\end_inset
+
+.
+ It should be kept in mind that the model is estimated on a 
+\emph on
+correlation
+\emph default
+ matrix of outcomes 
+\begin_inset Formula $\left(\mathbf{S}\right)$
+\end_inset
+
+ when choosing bounds.
+ Thus, it is somewhat uncommon --- but nevertheless possible --- for a coefficie
+nt to be greater than 
+\begin_inset Formula $\pm1$
+\end_inset
+
+.
+ It is always possible to select ``No'', but doing so does not make the
+ cells of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ unbounded.
+ Rather, fairly wide bounds are used, in particular 
+\begin_inset Formula $\pm1.5$
+\end_inset
+
+.
+ In some cases, it may be necessary to specify wider bounds, but in most
+ cases if the user answers ``Yes'', it would be to narrow the bounds.
+\end_layout
+
+\begin_layout Standard
+After an initial number is chosen to fill all the cells in the editor, the
+ user can change some or all of the cells as necessary.
+ For example, to estimate the model under a positive manifold restriction,
+ the user could set all lower bounds to 
+\begin_inset Formula $-0.2$
+\end_inset
+
+ or something.
+ When finished with the lower bounds, click the 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+, at which point the process is repeated for the upper bounds.
+ It is important for some, if not all, of the valid intervals to include
+ zero in a SEFA model so that the rotational indeterminancy can be eliminated
+ by mapping some coefficients to zero.
+\end_layout
+
+\begin_layout Subsubsection
+Mapping Rules for Coefficients at Level 1
+\begin_inset LatexCommand label
+name "sub:maps"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Mapping Rules at Level 1 in a SEFA Model
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:maps1"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/firstorder/SEFA/SEFA.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+In the SEFA model presumed here, the next question is very important and
+ pertains to the mapping rule used to squash certain cells of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ to zero.
+ If a CFA model were being estimated, this questions in figure 
+\begin_inset LatexCommand ref
+reference "fig:maps1"
+
+\end_inset
+
+ would not appear because the Howe (1955) theorem would be satisfied by
+ 
+\emph on
+a priori
+\emph default
+ restrictions.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ be the number of zeros required for the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+.
+ Most of the mapping rules at the second level are defined on the reference
+ structure matrix 
+\begin_inset Formula $\left(\check{\boldsymbol{\Upsilon}}\right)$
+\end_inset
+
+ and the factor contribution matrix 
+\begin_inset Formula $\left(\check{\boldsymbol{\Gamma}}\right)$
+\end_inset
+
+, rather than the primary pattern matrix (
+\begin_inset Formula $\check{\boldsymbol{\beta}}$
+\end_inset
+
+), where the 
+\begin_inset Formula $\check{}$
+\end_inset
+
+ indicates a prelimary matrix that is constructed by filling the free elments
+ with 
+\begin_inset Formula $\boldsymbol{\theta}$
+\end_inset
+
+ (in symbols) or 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{par}
+\end_layout
+
+\end_inset
+
+ (in R syntax).
+ By ``smallest'', I always mean in absolute value.
+ The mapping rules in the first dialog box in figure 
+\begin_inset LatexCommand ref
+reference "fig:maps1"
+
+\end_inset
+
+ are defined as follows:
+\end_layout
+
+\begin_layout Itemize
+``No, I just want plain zeros''.
+ This mapping rule simply squashes the 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ smallest elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\check{\boldsymbol{\Upsilon}}$
+\end_inset
+
+ to zero, implying that 
+\begin_inset Formula $\boldsymbol{\beta}_{p}$
+\end_inset
+
+ has 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ zeros.
+\end_layout
+
+\begin_layout Itemize
+``Encourage cohyperplanrity (revisionist Yates 1987)''.
+ This mapping rule squashes 
+\begin_inset Formula $r_{2}-1$
+\end_inset
+
+ elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ using the following piecewise function 
+\begin_inset Formula $\forall q\neq p$
+\end_inset
+
+:
+\begin_inset Formula \begin{eqnarray*}
+\beta_{jp} & = & \begin{cases}
+0 & \textrm{if}\,\check{\Gamma}_{jq}-\check{\Gamma}_{jq}=\max\left\{ \check{\boldsymbol{\Gamma}}_{q}-\check{\boldsymbol{\Gamma}}_{p}\right\} \\
+\check{\beta}_{jp} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+which tends to place the zeros for the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ in the rows where the factor contribution of some other column is large.
+\end_layout
+
+\begin_layout Itemize
+``
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ outcomes of complexity 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+ for each factor (weaker Thurstone)''.
+ This mapping rule is similar to the ``plain zeros'' mapping rule in that
+ 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ small elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\check{\boldsymbol{\Upsilon}}$
+\end_inset
+
+ are squashed to zero, except that there is an additional stipulation that
+ no outcome is of complexity less than 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+ where the complexity of the 
+\begin_inset Formula $j$
+\end_inset
+
+th outcome is the number of non-zeros in 
+\begin_inset Formula $\boldsymbol{\Upsilon}_{j}$
+\end_inset
+
+.
+ However, any ``non-zero'' coefficient can be arbitrarily close to zero.
+ Thus, each column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ will have 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ 
+\emph on
+exact
+\emph default
+ zeros.
+\end_layout
+
+\begin_layout Itemize
+``Unit complexity basis (revisionist Butler 1969)''.
+ This mapping rule uses the dishinguishability weights defined in Yates
+ (1987) to select 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ outcomes to be of unit complexity.
+ In particular, let
+\begin_inset Formula \begin{eqnarray*}
+\check{w}_{p} & = & \frac{1}{\sum\Gamma_{\centerdot\centerdot}}\sum_{j=1}^{n}\check{\Gamma}_{jp}\end{eqnarray*}
+
+\end_inset
+
+where 
+\begin_inset Formula $\sum\Gamma_{\centerdot\centerdot}=\sum_{j=1}^{n}\sum_{p=1}^{r_{1}}\check{\Gamma}_{jp}$
+\end_inset
+
+ is the weight applied the the 
+\begin_inset Formula $p$
+\end_inset
+
+th first-order factor such that 
+\begin_inset Formula $\sum_{p=1}^{r_{1}}w_{p}=1$
+\end_inset
+
+.
+ This equation is similar to equation 
+\begin_inset Formula $118$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+145).
+ Then let
+\begin_inset Formula \begin{eqnarray*}
+\check{c}_{j} & = & \frac{\sum_{p=1}^{r_{1}}\check{w}_{p}\check{\beta}_{jp}}{\sum_{p=1}^{r_{1}}\check{\Gamma}_{jp}}\end{eqnarray*}
+
+\end_inset
+
+be the directional cosine between 
+\begin_inset Formula $\check{\boldsymbol{\beta}}_{j}$
+\end_inset
+
+ and the (weighted) centroid of 
+\begin_inset Formula $\check{\boldsymbol{\beta}}$
+\end_inset
+
+, which is the same as equation 
+\begin_inset Formula $119$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+145).
+ Finally, let 
+\begin_inset Formula \begin{eqnarray*}
+d_{j}^{w} & = & \min\left\{ 1,\frac{\left(r_{1}\right)^{2}}{r_{1}-1}\check{c}_{j}\left(\check{c}_{j}-1\right)\right\} \end{eqnarray*}
+
+\end_inset
+
+be the distinguishability weight for 
+\begin_inset Formula $\check{\boldsymbol{\beta}}_{j}$
+\end_inset
+
+, which is the same as equation 
+\begin_inset Formula $78a$
+\end_inset
+
+ in Yates (1987, p.\InsetSpace ~
+112).
+ Then, 
+\begin_inset Formula $\forall p$
+\end_inset
+
+ choose a outcome to be of unit complexity among outcomes where 
+\begin_inset Formula $\check{\Gamma}_{jp}=\max\left\{ \boldsymbol{\check{\Gamma}}_{j}\right\} $
+\end_inset
+
+ such that 
+\begin_inset Formula $d_{j}^{w}$
+\end_inset
+
+ is maximal.
+ For such outcomes, squash 
+\begin_inset Formula $\boldsymbol{\beta}_{j}$
+\end_inset
+
+ to zero 
+\begin_inset Formula $\forall q\neq p$
+\end_inset
+
+.
+ At the end of these steps, there will be 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ outcomes that are collinear with the first-order primary axex and there
+ will be 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+ zeros in each column of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Set the maximum complexity for each outcome.
+\begin_inset Quotes erd
+\end_inset
+
+ This mapping rule is similar to the ``plain zeros'' mapping rule, except
+ that it is applied to each 
+\emph on
+row
+\emph default
+ of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ rather than the columns.
+ In general, 
+\begin_inset Formula $\forall j$
+\end_inset
+
+, the user can choose a number between 
+\begin_inset Formula $1$
+\end_inset
+
+ and 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ for the maximum number of non-zero coefficients in 
+\begin_inset Formula $\boldsymbol{\beta}_{j}$
+\end_inset
+
+.
+ This mapping rule is used as an example in figure 
+\begin_inset LatexCommand ref
+reference "fig:maps1"
+
+\end_inset
+
+.
+ It is possible to choose the same complexity for all rows of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+, in which case a simpler dialog box is shown.
+ Note that if the complexity of all rows of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ is 
+\begin_inset Formula $r_{1}-1$
+\end_inset
+
+, this restriction characterizes Thurstone's (1935) definition of simple
+ structure, and if the complexity of all rows is 
+\begin_inset Formula $1$
+\end_inset
+
+, this restriction implies a perfect cluster configuration.
+ In figure 
+\begin_inset LatexCommand ref
+reference "fig:maps1"
+
+\end_inset
+
+, I have chosen to (arbitrarily) specify the complexity of the rows of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ on a row-by-row basis, which gives more flexibility to place restrictions
+ on the model in accordance with prior theory.
+\end_layout
+
+\begin_layout Standard
+In some cases, 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ may be greater than the number of zeros created by whichever mapping rule
+ is chosen.
+ In that case, the remaining zeros are filled in by squashing the 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+ smallest elements in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of the 
+\emph on
+recalculated
+\emph default
+ reference structure matrix after the mapping rule has been applied and
+ some reference structure correlations are zero.
+ Thus, it is necessary to specify 
+\begin_inset Formula $b_{p}$
+\end_inset
+
+.
+ By default, the user is asked whether to set 
+\begin_inset Formula $b_{p}=r_{1}\,\forall p$
+\end_inset
+
+, which can be accepted by answering ``Yes'' to the question in figure 
+\begin_inset LatexCommand ref
+reference "fig:maps1"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Lexical Criteria
+\end_layout
+
+\begin_layout Standard
+Finally, the user is asked which lexical criteria should be included in
+ the optimization.
+ Regardless of what options are chosen here, there will always be criteria
+ that impose necessary constraints on the model (positive definite correlation
+ matrices, positive specific variances, etc.) and constraints that the column
+ sums of 
+\begin_inset Formula $\boldsymbol{\Delta}$
+\end_inset
+
+ (if a second-order model is estimated) and 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ are positive, which improves the computational efficiency of the algorithm.
+ Also, regardless of what options are chosen here, the ultimate criterion
+ will be appended to the end of the criteria that define constraints.
+ In this case, the model is to be estimated by maximum likelihood, so the
+ dialog box reminds the user of this.
+ If a second-order model is not estimated, the choices that mention with
+ ``level 2'' in figure 
+\begin_inset LatexCommand ref
+reference "fig:lexical"
+
+\end_inset
+
+ would not appear.
+ 
+\end_layout
+
+\begin_layout Standard
+Pe
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+~{n}
+\end_layout
+
+\end_inset
+
+a and Rodriguez (2003) defines a determinant of a correlation matrix among
+ a set of variables raised to the power of the reciprocal of the number
+ of variables as the ``effective variance'' of those variables.
+ The essence of the effective variance is that it can be meaningfully compared
+ to a different set of variables when the sets of variables differ in size.
+ The generalized variance is more well-known statistic and is simply the
+ determinant of the correlation matrix among a set of variables.
+ The generalized variance can be interpreted as the hypervolume of a set
+ of unit-length vectors and the effective variance can be interpreted as
+ 
+\begin_inset Quotes eld
+\end_inset
+
+the length of the side of the hypercube whose volume is equal to the determinant
+ (Pe
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+~{n}
+\end_layout
+
+\end_inset
+
+a and Rodriguez 2003, p.\InsetSpace ~
+363).
+\begin_inset Quotes erd
+\end_inset
+
+ Both of these concepts are used to define the criteria / constraints in
+ figure 
+\begin_inset LatexCommand ref
+reference "fig:lexical"
+
+\end_inset
+
+:
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Lexical Criteria in SEFA
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:lexical"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/firstorder/constraints/constraints.gif
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Reference factors at level 2 must have more effective variance than do the
+ primary factors at level 1
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as 
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\leq\left|\mathbf{Z}\boldsymbol{\Xi}^{-1}\mathbf{Z}\right|^{\frac{1}{r_{2}}}\\
+\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}-\left|\mathbf{Z}\boldsymbol{\Xi}^{-1}\mathbf{Z}\right|^{\frac{1}{r_{2}}} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and loosely requires that the reference factors at level 2 be ``less correlated
+ per variable'' than are the primary factors at level 1.
+ This criterion tends to push the second-order axes toward the edge of the
+ configuration of first-order factors.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Primary factors at level 2 must have more effective variance than do the
+ primary factors at level 1
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as 
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\leq\left|\boldsymbol{\Xi}\right|^{\frac{1}{r_{2}}}\\
+\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}-\left|\boldsymbol{\Xi}\right|^{\frac{1}{r_{2}}} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and is similar to the criterion above.
+ In general, it seems that imposing this restriction on the second-order
+ primary factors is 
+\emph on
+stronger
+\emph default
+ than imposing it on the second-order reference factors and pushes the second-or
+der axes farther toward the edge of the configuration of first order factors.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Reference factors at level 1 must have more effective variance than does
+ the battery as a whole
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Psi}\right|^{\frac{1}{r_{1}}}\leq\left|\mathbf{C}\right|^{\frac{1}{n}}\\
+\left|\boldsymbol{\Psi}\right|^{\frac{1}{r_{1}}}-\left|\mathbf{C}\right|^{\frac{1}{n}} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and is similar to the two criteria above except that the comparison is relative
+ to 
+\begin_inset Formula $\mathbf{C}$
+\end_inset
+
+.
+ In this case, the criterion loosely implies that the reference factors
+ at level 1 be 
+\begin_inset Quotes eld
+\end_inset
+
+less correlated per variable'' than is the test configuration in common
+ factor space and encourages the first-order axes to cut through the edges
+ of the test configuration.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Primary factors at level 1 must have more effective variance than does the
+ battery as a whole
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\leq\left|\mathbf{C}\right|^{\frac{1}{n}}\\
+\left|\Phi\right|^{\frac{1}{r_{1}}}-\left|\mathbf{C}\right|^{\frac{1}{n}} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and is similar to the previous criterion above except that the correlation
+ among the primary factors at issue.
+ In general, it seems that imposing this restriction on the primary factors
+ is 
+\emph on
+stronger
+\emph default
+ than imposing it on the reference factors and tends to push the first-order
+ axes farther out into the edges of the test configuration.
+\end_layout
+
+\begin_layout Itemize
+``No suppressor variables at level 2'' Suppressor variables are defined
+ as variables with negative factor contributions.
+ This criterion is advocated, albeit somewhat indirectly, in Yates (1987,
+ p.\InsetSpace ~
+119) with respect to level 1, although I can see no reason why it would
+ be any less applicable to level 2.
+ Prohibiting suppressor variables strikes me as a reasonable assumption
+ to make in most cases.
+ The criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+\frac{1}{r_{1}r_{2}}\sum_{j=1}^{r_{1}}\sum_{p=1}^{r_{2}}\mathbb{I}\left\{ \Game_{jp}\geq\underline{\Game}\right\}  & \textrm{where} & \mathbb{I}\left\{ \Game_{jp}\geq\underline{\Game}\right\} =\begin{cases}
+1 & \textrm{if\,\,}\Game_{jp}\geq\underline{\Game}\\
+0 & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and 
+\begin_inset Formula $\underline{\Game}$
+\end_inset
+
+ is a threshold for the minimum acceptable factor contribution that is specified
+ by the user, as shown at the bottom of figure 
+\begin_inset LatexCommand ref
+reference "fig:lexical"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+``No suppressor variables at level 1''.
+ This criterion is conceptually similar to the one above and is formally
+ defined at level 1 as 
+\begin_inset Formula \begin{eqnarray*}
+\frac{1}{nr}\sum_{j=1}^{n}\sum_{p=1}^{r}\mathbb{I}\left\{ \Gamma_{jp}\geq\underline{\Gamma}\right\}  & \textrm{where} & \mathbb{I}\left\{ \Gamma_{pj}\geq\underline{\Gamma}\right\} =\begin{cases}
+1 & \textrm{if\,\,}\Gamma_{pj}\geq\underline{\Gamma}\\
+0 & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and 
+\begin_inset Formula $\underline{\Gamma}$
+\end_inset
+
+ is a threshold for the minimum acceptable factor contribution that is specified
+ by the user as shown at the bottom of figure 
+\begin_inset LatexCommand ref
+reference "fig:lexical"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+``Reference factors at level 2 must have more generalized variance than
+ do primary factors at level 2''.
+ This criterion is extrapolated from Yates (1987, p.\InsetSpace ~
+27), although it is not
+ asserted with much formality in the text, is not specifically advocated
+ for level 2.
+ Regardless, the criterion could be operationalized as 
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Xi}\right|\leq\left|\mathbf{Z}\boldsymbol{\Xi}^{-1}\mathbf{Z}\right|\\
+\left|\boldsymbol{\Xi}\right|-\left|\mathbf{Z}\boldsymbol{\Xi}^{-1}\mathbf{Z}\right| & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+but has a faster and substantively equivalent operationalization in the
+ code.
+ However, when 
+\begin_inset Formula $r_{2}=2$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\boldsymbol{\Xi}\right|=\left|\mathbf{Z}\boldsymbol{\Xi}^{-1}\mathbf{Z}\right|$
+\end_inset
+
+ by necessity, so this criterion can bind only in the rare case where 
+\begin_inset Formula $r_{2}\geq3$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+``Reference factors at level 1 must have more generalized variance than
+ do primary factors at level 1''.
+ This criterion is conceptually the same as the previous one and could be
+ operationalized as 
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|\leq\left|\boldsymbol{\Psi}\right|\\
+\left|\boldsymbol{\Phi}\right|-\left|\boldsymbol{\Psi}\right| & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+but has a faster and substantively equivalent operationalization in the
+ code.
+ When 
+\begin_inset Formula $r_{1}=2$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\boldsymbol{\Phi}\right|=\left|\boldsymbol{\Psi}\right|$
+\end_inset
+
+ by necessity, so this criterion can bind in the case when 
+\begin_inset Formula $r_{1}\geq3$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+``Tests in hyperplanes have more effective variance than does the battery
+ as a whole''.
+ This criterion is only defined for level 1, although I suppose it could
+ be defined for level 2 at some point in the future.
+ It seems consistent with the spirit of Yates (1987) but is not explicitly
+ advocated anywhere.
+ This criterion is formally defined as 
+\begin_inset Formula \begin{eqnarray*}
+\frac{1}{r_{1}}\sum_{p=1}^{r_{1}}\mathbb{I}\left\{ \left|\overset{p}{\boldsymbol{\beta}}\boldsymbol{\Phi}\overset{p}{\boldsymbol{\beta}^{\prime}}+\overset{p}{\boldsymbol{\Theta}^{2}}\right|^{\frac{1}{b}}\geq\left|\mathbf{C}\right|^{\frac{1}{n}}\right\}  & \textrm{where} & \mathbb{I}\left\{ \left|\overset{p}{\boldsymbol{\beta}}\boldsymbol{\Phi}\overset{p}{\boldsymbol{\beta}^{\prime}}+\overset{p}{\boldsymbol{\Theta}^{2}}\right|^{\frac{1}{b}}\geq\left|\mathbf{C}\right|^{\frac{1}{n}}\right\} =\begin{cases}
+1 & \textrm{if\,}\left|\overset{p}{\boldsymbol{\beta}}\boldsymbol{\Phi}\overset{p}{\boldsymbol{\beta}^{\prime}}+\overset{p}{\boldsymbol{\Theta}^{2}}\right|^{\frac{1}{b}}\geq\left|\mathbf{C}\right|^{\frac{1}{n}}\\
+0 & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+
+\begin_inset Formula $\overset{p}{\boldsymbol{\beta}}$
+\end_inset
+
+ is the 
+\begin_inset Formula $b_{p}\times r_{1}$
+\end_inset
+
+ submatrix of 
+\begin_inset Formula $\boldsymbol{\beta}$
+\end_inset
+
+ with exact zeros in the 
+\begin_inset Formula $p$
+\end_inset
+
+th column and 
+\begin_inset Formula $\overset{p}{\boldsymbol{\Theta}^{2}}$
+\end_inset
+
+ is the 
+\begin_inset Formula $b_{p}\times b_{p}$
+\end_inset
+
+ diagonal (but not necessarily contiguous) submatrix of 
+\begin_inset Formula $\boldsymbol{\Theta}^{2}$
+\end_inset
+
+ with the unique variances of the outcomes in the 
+\begin_inset Formula $p$
+\end_inset
+
+th hyperplane.
+ Thus, this criterion essentially requires that the tests in the 
+\begin_inset Formula $p$
+\end_inset
+
+th hyperplane be ``less correlated per variable'' than is the battery as
+ a whole (in common factor space) for all 
+\begin_inset Formula $r_{1}$
+\end_inset
+
+ hyperplanes at level 1.
+\end_layout
+
+\begin_layout Standard
+Note that it is possible to select more than one of these criteria as constraint
+s in the lexical optimization process.
+\newpage
+
+\end_layout
+
+\begin_layout Section
+Exploratory Factor Analysis via 
+\family typewriter
+Factnal()
+\family default
+ and 
+\family typewriter
+Rotate()
+\end_layout
+
+\begin_layout Standard
+This strategy of EFA is explained in more detail in Goodrich (2008b).
+ To start this sequence, I typed the command
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+
+\backslash
+ 
+\backslash
+Rcode{mental.tests.efa <- Factanal(covmat = Harman74.cor, factors = 5, model
+ = "EFA")}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Factor Extraction
+\end_layout
+
+\begin_layout Standard
+I use 
+\begin_inset Formula $\boldsymbol{\Lambda}$
+\end_inset
+
+ to indicate the preliminary pattern matrix to estimate when the preliminary
+ factors are orthogonal.
+\end_layout
+
+\begin_layout Standard
+The only dialog box asks what algorithm to use to estimate the exploratory
+ factor analysis model:
+\newline
+
+\begin_inset Graphics
+	filename screenshots/EFA/01.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first option simply calls 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{factanal()}
+\end_layout
+
+\end_inset
+
+, which is fine for many problems and estimates the EFA model with the restricti
+ons that 
+\begin_inset Formula $\boldsymbol{\Lambda}^{\prime}\boldsymbol{\Theta}^{2}\boldsymbol{\Lambda}$
+\end_inset
+
+ is diagonal and 
+\begin_inset Formula $\boldsymbol{\Phi}=\mathbf{I}$
+\end_inset
+
+.
+ The second algorithm imposes these same restrictions but uses 
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+Rcode{genoud()}
+\end_layout
+
+\end_inset
+
+ to optimize with a genetic algorithm.
+ This approach is much slower but slightly more likely to reach the global
+ optimum in complicated problems The third algorithm estimates the model
+ under restrictions that 
+\begin_inset Formula $\boldsymbol{\Lambda}=\begin{bmatrix}\boldsymbol{\Lambda}_{1}\\
+\boldsymbol{\Lambda}_{2}\end{bmatrix}$
+\end_inset
+
+ where 
+\begin_inset Formula $\boldsymbol{\Lambda}_{1}$
+\end_inset
+
+ is a 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ matrix with zeros above the diagonal and 
+\begin_inset Formula $\boldsymbol{\Phi}=\mathbf{I}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+In principle, all three algorithms should produce the same estimate of 
+\begin_inset Formula $\boldsymbol{\Theta}^{2}$
+\end_inset
+
+ and be within a rotation of each other.
+ In practice, the third algorithm has difficulty meeting these standards.
+\end_layout
+
+\begin_layout Subsection
+Factor Transformation
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\boldsymbol{\Phi}=\mathbf{T}^{\prime}\mathbf{T}$
+\end_inset
+
+ where 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ is a 
+\begin_inset Formula $r_{1}\times r_{1}$
+\end_inset
+
+ transformation matrix with unit-length columns.
+ The factor transformation step chooses 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ so so that some (lexical) objective function is 
+\emph on
+minimized
+\emph default
+.
+ I initiated this sequence with
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+
+\backslash
+ 
+\backslash
+Rcode{mental.tests.rotated <- Rotate(mental.tests.efa)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Constraints
+\end_layout
+
+\begin_layout Standard
+Pe
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+~{n}
+\end_layout
+
+\end_inset
+
+a and Rodriguez (2003) defines a determinant of a correlation matrix among
+ a set of variables raised to the power of the reciprocal of the number
+ of variables as the ``effective variance'' of those variables.
+ The essence of the effective variance is that it can be meaningfully compared
+ to a different set of variables when the sets of variables differ in size.
+ The generalized variance is more well-known statistic and is simply the
+ determinant of the correlation matrix among a set of variables.
+ The generalized variance can be interpreted as the hypervolume of a set
+ of unit-length vectors and the effective variance can be interpreted as
+ 
+\begin_inset Quotes eld
+\end_inset
+
+the length of the side of the hypercube whose volume is equal to the determinant
+ (Pe
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+~{n}
+\end_layout
+
+\end_inset
+
+a and Rodriguez 2003, p.\InsetSpace ~
+363).
+\begin_inset Quotes erd
+\end_inset
+
+ Both of these concepts are used to define the criteria / constraints in
+ figure 
+\begin_inset LatexCommand ref
+reference "fig:constraints_EFA"
+
+\end_inset
+
+ to be used while seeking the optimal 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Possible Constraints when Optimizing for 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ in EFA
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:constraints_EFA"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/EFA/constraints.gif
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+The first criterion is required and prevents factor collapse.
+ The effective variance of the primary factors is defined as 
+\begin_inset Formula $\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}=0$
+\end_inset
+
+, then 
+\begin_inset Formula $\boldsymbol{\Phi}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ are singular, a circumstance which is known as ``factor collapse''.
+ By specifying a non-zero threshold that the effective variance must exceed,
+ factor collapse can thus be prevented.
+ In this case, the threshold is 
+\begin_inset Formula $0.25$
+\end_inset
+
+ and the criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+-1 & \textrm{if}\,\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\geq0.25\\
+-\left(\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\right) & \textrm{otherwise.}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The remaining constraints are optional and are enumerated in the next dialog
+ box in figure 
+\begin_inset LatexCommand ref
+reference "fig:constraints_EFA"
+
+\end_inset
+
+.
+ These criteria are defined as follows:
+\end_layout
+
+\begin_layout Itemize
+``Limit primary factor correlations''.
+ This option allows the user to set valid intervals for pairwise corrleations
+ between primary factors, i.e.
+ the off-diagonals of 
+\begin_inset Formula $\boldsymbol{\Phi}=\mathbf{T}^{\prime}\mathbf{T}$
+\end_inset
+
+.
+ If this box is checked, dialog boxes that are similar to the previous one
+ will pop up asking for minimum and maximum acceptable correlations.
+ The associated criterion equals 
+\begin_inset Formula $-1$
+\end_inset
+
+ if all off-diagonals are within their valid intervals and equal to the
+ distance between the most abberrant correlation and the valid interval
+ otherwise.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Reference factors must have more effective variance than does the battery
+ as a whole
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Psi}\right|^{\frac{1}{r_{1}}}\leq\left|\mathbf{C}\right|^{\frac{1}{n}}\\
+\left|\boldsymbol{\Psi}\right|^{\frac{1}{r_{1}}}-\left|\mathbf{C}\right|^{\frac{1}{n}} & \textrm{otherwise.}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+This criterion loosely implies that the reference factors must be 
+\begin_inset Quotes eld
+\end_inset
+
+less correlated per variable'' than is the test configuration in common
+ factor space and encourages the first-order axes to cut through the edges
+ of the test configuration.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Primary factors must have more effective variance than does the battery
+ as a whole
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|^{\frac{1}{r_{1}}}\leq\left|\mathbf{C}\right|^{\frac{1}{n}}\\
+\left|\Phi\right|^{\frac{1}{r_{1}}}-\left|\mathbf{C}\right|^{\frac{1}{n}} & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and is similar to the previous criterion above except that the correlation
+ among the primary factors at issue.
+ In general, it seems that imposing this restriction on the primary factors
+ is 
+\emph on
+stronger
+\emph default
+ than imposing it on the reference factors and tends to push the first-order
+ axes farther out into the edges of the test configuration.
+\end_layout
+
+\begin_layout Itemize
+``Primary factors must have less generalized variance than do reference
+ factors''.
+ This criterion is extrapolated from Yates (1987, p.\InsetSpace ~
+27), although it is not
+ asserted with much formality in the text.
+ Regardless, the criterion could be operationalized as
+\begin_inset Formula \begin{eqnarray*}
+ & \begin{cases}
+-1 & \textrm{if\,}\left|\boldsymbol{\Phi}\right|\leq\left|\boldsymbol{\Psi}\right|\\
+\left|\boldsymbol{\Psi}\right|-\left|\boldsymbol{\Phi}\right| & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+but has a faster and substantively equivalent operationalization in the
+ code.
+ When 
+\begin_inset Formula $r_{1}=2$
+\end_inset
+
+, 
+\begin_inset Formula $\left|\boldsymbol{\Phi}\right|=\left|\boldsymbol{\Psi}\right|$
+\end_inset
+
+ by necessity, so this criterion can bind only when 
+\begin_inset Formula $r_{1}\geq3$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+``No suppressor variables''.
+ Suppressor variables are defined as variables with negative factor contribution
+s.
+ This criterion is advocated, albeit somewhat indirectly, in Yates (1987,
+ p.\InsetSpace ~
+119).
+ Prohibiting suppressor variables strikes me as a reasonable assumption
+ to make in most cases.
+ The criterion is formally defined as 
+\begin_inset Formula \begin{eqnarray*}
+-\frac{1}{nr}\sum_{j=1}^{n}\sum_{p=1}^{r}\mathbb{I}\left\{ \Gamma_{jp}\geq\underline{\Gamma}\right\}  & \textrm{where} & \mathbb{I}\left\{ \Gamma_{jp}\geq\underline{\Gamma}\right\} =\begin{cases}
+1 & \textrm{if\,}\Gamma_{jp}\geq\underline{\Gamma}\\
+0 & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+and 
+\begin_inset Formula $\underline{\Gamma}$
+\end_inset
+
+ is a threshold for the minimum acceptable factor contribution that is specified
+ by the user.
+ If this criterion is checked, a pop-up will ask for the value of 
+\begin_inset Formula $\underline{\Gamma}$
+\end_inset
+
+.
+ See the very end of section 
+\begin_inset LatexCommand ref
+reference "sub:maps"
+
+\end_inset
+
+ for a picture and explanation of this dialog box, which is virtually identical
+ to the next one.
+\end_layout
+
+\begin_layout Itemize
+``Positive manifold''.
+ This criterion is similar to (and a bit more restrictive than) the criterion
+ that prohibits suppressor variables.
+ The criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+-\frac{1}{nr}\sum_{j=1}^{n}\sum_{p=1}^{r}\mathbb{I}\left\{ \Upsilon_{jp}\geq\underline{\Upsilon}\right\}  & \textrm{where} & \mathbb{I}\left\{ \Upsilon_{jp}\geq\underline{\Upsilon}\right\} =\begin{cases}
+1 & \textrm{if\,}\Upsilon_{jp}\geq\underline{\Upsilon}\\
+0 & \textrm{otherwise,}\end{cases}\end{eqnarray*}
+
+\end_inset
+
+where 
+\begin_inset Formula $\underline{\Upsilon}$
+\end_inset
+
+ is a threshold for the minimum acceptable reference structure correlation
+ that is specified by the user.
+ If this criterion is checked, the dialog box at the bottom of figure 
+\begin_inset LatexCommand ref
+reference "fig:constraints_EFA"
+
+\end_inset
+
+will ask for the value of 
+\begin_inset Formula $\underline{\Upsilon}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+The Ultimate Criterion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Ultimate Criteria to be Used when Optimizing for 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ in EFA
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:ultimates"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/EFA/ultimates.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+The final step is to choose the ultimate criterion for lexical optimization,
+ as shown in the dialog box in figure 
+\begin_inset LatexCommand ref
+reference "fig:ultimates"
+
+\end_inset
+
+.
+ These criteria are defined as follows:
+\end_layout
+
+\begin_layout Itemize
+minimaximin: This criterion attempts to satisfy Thurstone's definition of
+ simple structure by choosing 
+\begin_inset Formula $\mathbf{T}$
+\end_inset
+
+ so that all outcomes have at least one near-zero reference structure correlatio
+n.
+ The criterion is formally defined as 
+\begin_inset Formula \begin{eqnarray*}
+ & \ln\left(\max\left\{ \min\left\{ \Upsilon_{1}^{2}\right\} ,\min\left\{ \Upsilon_{2}^{2}\right\} ,\dots,\min\left\{ \Upsilon_{n}^{2}\right\} \right\} \right).\end{eqnarray*}
+
+\end_inset
+
+Thus, the (log of the) maximum of the minimums of the squared rows of 
+\begin_inset Formula $\boldsymbol{\Upsilon}$
+\end_inset
+
+ is minimized.
+ Taking the natural logarithm just makes the optimization work a bit better
+ near zero.
+\end_layout
+
+\begin_layout Itemize
+phi: This criterion was proposed by Thurstone (1935) to numerically characterize
+ simple structure when it reaches its theoretical minimum of (log) zero.
+ The criterion is formally defined as
+\begin_inset Formula \begin{eqnarray*}
+ & \ln\left(\sum_{j=1}^{n}\exp\left(\frac{1}{c}\sum_{p=1}^{r_{1}}\ln\left(\Upsilon_{jp}^{2}\right)\right)\right),\end{eqnarray*}
+
+\end_inset
+
+which is equal to logarithm of 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as defined by Thurstone (1935) when 
+\begin_inset Formula $c=1$
+\end_inset
+
+.
+ Thurstone suggested that choosing 
+\begin_inset Formula $c$
+\end_inset
+
+ to be greater than 
+\begin_inset Formula $1.0$
+\end_inset
+
+ could yield better results by lessening the pressure to get one near-zero
+ into each row of 
+\begin_inset Formula $\boldsymbol{\Upsilon}$
+\end_inset
+
+ and increasing the pressure to get more than one near-zero into some rows
+ of 
+\begin_inset Formula $\boldsymbol{\Upsilon}$
+\end_inset
+
+.
+ If Thurstone's criterion is used, the dialog box at the bottom of figure
+ 
+\begin_inset LatexCommand ref
+reference "fig:ultimates"
+
+\end_inset
+
+will appear, prompting the user for 
+\begin_inset Formula $c$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+varphi: This criterion is a generalization of Thurstone's 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $\overrightarrow{\boldsymbol{\Upsilon}}$
+\end_inset
+
+ be a matrix of reference structure correlations where each row is independently
+ sorted in increasing magnitude, and let 
+\begin_inset Formula $\underset{-\left[1:p\right]}{\overrightarrow{\phi}}$
+\end_inset
+
+ be Thurstone's criterion (with 
+\begin_inset Formula $c=1$
+\end_inset
+
+) calculated on 
+\begin_inset Formula $\overrightarrow{\boldsymbol{\Upsilon}}$
+\end_inset
+
+, excluding the first through the 
+\begin_inset Formula $p$
+\end_inset
+
+th column of 
+\begin_inset Formula $\overrightarrow{\boldsymbol{\Upsilon}}$
+\end_inset
+
+.
+ Then define 
+\begin_inset Formula $\varphi=\phi+\sum_{p=1}^{r-2}w_{p}\underset{-\left[1:p\right]}{\overrightarrow{\phi}}$
+\end_inset
+
+, where 
+\begin_inset Formula $w_{p}\in\left[0,1\right]$
+\end_inset
+
+ is the weight the analyst specifies for 
+\begin_inset Formula $\underset{-\left[1:p\right]}{\overrightarrow{\phi}}$
+\end_inset
+
+ relative to a unit weight placed on 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ At one extreme, if 
+\begin_inset Formula $w_{p}=0\,\forall p$
+\end_inset
+
+, then 
+\begin_inset Formula $\varphi=\phi$
+\end_inset
+
+.
+ At the other extreme, if 
+\begin_inset Formula $w_{p}=1\,\forall p$
+\end_inset
+
+, then the analyst favors a perfect cluster configuration, where three is
+ only one non-zero coefficient per test.
+ An ``objective'' alternative to specifying weights is to specify that the
+ weights are a function of 
+\begin_inset Formula $\overrightarrow{\boldsymbol{\Upsilon}}$
+\end_inset
+
+, such as 
+\begin_inset Formula $w_{p}=\max\left\{ 0,1-\max\left\{ \overrightarrow{\Upsilon}_{\left(p+1\right)}^{2}\right\} \right\} $
+\end_inset
+
+ to gradually reduce the weight as 
+\begin_inset Formula $p$
+\end_inset
+
+ increases.
+ If this criterion is chosen, the dialog boxes in figure 
+\begin_inset LatexCommand ref
+reference "fig:weights"
+
+\end_inset
+
+ will appear, prompting the user to specify whether dynamic weights or static
+ weights should be used.
+ If user-specified weights are chosen, the user is then prompted to specify
+ each 
+\begin_inset Formula $w_{p}$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Itemize
+LS: This criterion is called the Loading Simplicy Index in Lorenzo-Seva
+ (2003).
+ The derivation of it is not complicated but involves a lot of notation
+ not previously introduced here, so the reader is refered to Lorenzo-Seva
+ (2003) for details.
+ Simply put, it reaches its optimum of (negative) 
+\begin_inset Formula $1.0$
+\end_inset
+
+ when 
+\begin_inset Formula $\boldsymbol{\Upsilon}$
+\end_inset
+
+ exhibits a perfect cluster configuration.
+ Although Lorenzo-Seva (2003) defines the Loading Simplicity Index in terms
+ of the primary pattern matrix, it is invariant to the column-scale of the
+ primary pattern matrix and thus can arbitrarily be defined for the reference
+ structure matrix as well.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Standard
+\begin_inset Caption
+
+\begin_layout Standard
+Weights for the 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ Criterion
+\end_layout
+
+\end_inset
+
+
+\begin_inset LatexCommand label
+name "fig:weights"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\align center
+\begin_inset Graphics
+	filename screenshots/EFA/varphi.gif
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+References
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Butler, J.M.
+ 1969.
+ ``Simple Structure Reconsidered: Distinguishability and Invariance in Factor
+ Analysis.'' 
+\emph on
+Multivariate Behavioral Research
+\emph default
+ 4(1):5–28.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Goodrich, B.
+ 2008a.
+ ``SEFA
+\begin_inset Formula $i$
+\end_inset
+
+R So Far.'' Unpublished manuscript available from 
+\begin_inset LatexCommand htmlurl
+name "the FAiR wiki"
+target "http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Goodrich, B.
+ 2008b.
+ ``Analytic Transformation of Factors in FA
+\begin_inset Formula $i$
+\end_inset
+
+R.'' Unwritten manuscript.
+ Email me about it.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Howe, W.G.
+ 1955.
+ Some Contributions to Factor Analysis.
+ Technical report ORNL-1919, Oak Ridge National Lab., Tenn.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Lorenzo-Seva, U.
+ 2003.
+ “A factor simplicity index.” 
+\emph on
+Psychometrika
+\emph default
+ 68(1):49–60.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Pe
+\begin_inset ERT
+status open
+
+\begin_layout Standard
+
+
+\backslash
+~{n}
+\end_layout
+
+\end_inset
+
+a, D.
+ and J.
+ Rodriguez.
+ 2003.
+ ``Descriptive measures of multivariate scatter and linear dependence.''
+ 
+\emph on
+Journal of Multivariate Analysis
+\emph default
+ 85(2):361–374.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Thurstone, L.L.
+ 1935.
+ 
+\emph on
+The vectors of mind: multiple-factor analysis for the isolation of primary
+ traits
+\emph default
+.
+ University of Chicago Press.
+\end_layout
+
+\begin_layout Standard
+
+\size small
+Yates, A.
+ 1987.
+ 
+\emph on
+Multivariate exploratory data analysis: A perspective on exploratory factor
+ analysis
+\emph default
+.
+ State University of New York Press.
+\end_layout
+
+\end_body
+\end_document

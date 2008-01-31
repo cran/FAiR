@@ -1,0 +1,58 @@
+exportPattern("^([^.F]|F[^A]|FA[^i]|FAi[^R]|FAiR[^_])")
+#exportPattern("^([^F]|F[^A]|FA[^i]|FAi[^R]|FAiR[^_])")
+
+# From graphics
+importFrom(graphics, pairs)
+
+# From stats
+importFrom(stats, fitted, residuals, rstandard, model.matrix,
+                  influence, predict, df.residual, deviance)
+
+# From stats4
+importFrom(stats4, BIC, logLik, coef, vcov, plot, confint, profile)
+
+# From FAiR
+exportClasses(FA, 
+                FA.general,
+                FA.2ndorder,
+              restrictions,
+                restrictions.factanal,
+                restrictions.orthonormal,
+                restrictions.1storder,
+                restrictions.general,
+                restrictions.2ndorder,
+              summary.FA)
+
+exportMethods(BIC, logLik, 
+                fitS4, bfgs_fitS4, gr_fitS4, bfgs_helpS4, 
+                create_start, create_FAobject,
+                show, coef, vcov, plot, summary, confint, profile)
+
+# S3 methods
+S3method(deviance, FA)
+S3method(deviance, FA.general)
+S3method(deviance, FA.2ndorder)
+S3method(df.residual, FA)
+S3method(df.residual, FA.general)
+S3method(df.residual, FA.2ndorder)
+S3method(fitted, FA)
+S3method(fitted, FA.general)
+S3method(fitted, FA.2ndorder)
+S3method(influence, FA)
+S3method(influence, FA.general)
+S3method(influence, FA.2ndorder)
+S3method(model.matrix, FA)
+S3method(model.matrix, FA.general)
+S3method(model.matrix, FA.2ndorder)
+S3method(pairs, FA)
+S3method(pairs, FA.general)
+S3method(pairs, FA.2ndorder)
+S3method(predict, FA)
+S3method(predict, FA.general)
+S3method(predict, FA.2ndorder)
+S3method(residuals, FA)
+S3method(residuals, FA.general)
+S3method(residuals, FA.2ndorder)
+S3method(rstandard, FA)
+S3method(rstandard, FA.general)
+S3method(rstandard, FA.2ndorder)
