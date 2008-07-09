@@ -1,15 +1,17 @@
 Package: FAiR
 Type: Package
 Title: Factor Analysis in R
-Version: 0.2-0
-Date: 2008-01-31
+Version: 0.4-0
+Date: 2008-07-09
 Author: Ben Goodrich
 Maintainer: Ben Goodrich <bgokGM@gmail.com>
-Description: This package estimates factor analysis models using a genetic algorithm, which  makes opens up a number of new ways to pursue old ideas, such as those discussed by Allen  Yates in his 1987 book Multivariate Exploratory Data Analysis. The major sources of value added in this package are new ways to transform factors in exploratory factor analysis, and perhaps more importantly, a new estimator for the factor analysis model called semi-exploratory factor analysis.
-License: GPL (>= 3)
-Imports:  stats4
-Enhances: stats4
-Depends: R (>= 2.6.0), methods, rgenoud (>= 5.4-7), gWidgetsRGtk2, stats4
-Suggests: robustbase, MASS, nFactors
+Description: This package estimates factor analysis models using a genetic algorithm, which permits a general mechanism for restricted optimization with arbitrary restrictions that are chosen at run time with the help of a GUI. Importantly, inequality restrictions can be imposed on functions of multiple parameters, which provides a new avenues for testing and generating theories with factor analysis models. This package also includes an entirely new estimator of the common factor analysis model called semi-exploratory factor analysis, which is a general alternative to exploratory and confirmatory factor analysis. Finally, this package integrates a lot of other packages that estimate sample covariance matrices and thus provides a lot of alternatives to the traditional sample covariance calculation. Note that you need to have the Gtk run time library installed on your system to use this package; see the URL below for detailed installation instructions. Most users would only need to understand the first twenty-four pages of the PDF manual.
+URL: http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair
+License: FILE
+Encoding: UTF-8
+Imports:  stats4, rrcov
+Enhances: stats4, rrcov
+Depends: R (>= 2.7.0), methods, rgenoud (>= 5.4-7), gWidgetsRGtk2 (>= 0.0-31), stats4, rrcov, Matrix
+Suggests: corpcor, mvnmle, polycor, nFactors, Rgraphviz, mvnormtest, energy, jit, GPArotation
 LazyLoad: yes
-Packaged: Fri Feb  1 04:54:38 2008; goodrich
+Packaged: Wed Jul  9 03:05:36 2008; goodrich

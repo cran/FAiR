@@ -1,58 +1,64 @@
-exportPattern("^([^.F]|F[^A]|FA[^i]|FAi[^R]|FAiR[^_])")
+#exportPattern("^([^.F]|F[^A]|FA[^i]|FAi[^R]|FAiR[^_])")
 #exportPattern("^([^F]|F[^A]|FA[^i]|FAi[^R]|FAiR[^_])")
 
 # From graphics
 importFrom(graphics, pairs)
 
+# From rrcov
+importFrom(rrcov, screeplot, predict)
+
+# From Matrix
+importFrom(Matrix, crossprod, chol)
+
 # From stats
-importFrom(stats, fitted, residuals, rstandard, model.matrix,
-                  influence, predict, df.residual, deviance)
+importFrom(stats, fitted, residuals, rstandard, model.matrix, simulate,
+                  influence, df.residual, deviance, weights)
 
 # From stats4
 importFrom(stats4, BIC, logLik, coef, vcov, plot, confint, profile)
 
 # From FAiR
-exportClasses(FA, 
+# Compiled code thing
+useDynLib(FAiR, FAiR_QD_sum, FAiR_QD_grad)
+
+# User-visible non-S4 functions
+export(Factanal, Rotate, read.cefa, read.CEFA, write.cefa, write.CEFA, read.triangular, 
+       model_comparison, paired_comparison, mapping_rule,
+       GPA2FA, restrictions2Mathomatic, restrictions2mathomatic, FA2draws, FA2RAM)
+
+# Formal S4 Classes
+exportClasses(equality_restriction,
+              FA,
+                FA.EFA,
                 FA.general,
                 FA.2ndorder,
+              manifest,
+                manifest.basic,
+                  manifest.basic.userW,
+                  manifest.data,
+                    manifest.data.ordinal,
+                    manifest.data.ranks,
+                    manifest.data.mcd,
+              parameter,
+                parameter.cormat,
+                parameter.coef,
+                  parameter.coef.nl,
+                  parameter.coef.SEFA,
+                    parameter.coef.SEFA.nl,
+                parameter.scale,
               restrictions,
+                restrictions.independent,
                 restrictions.factanal,
                 restrictions.orthonormal,
                 restrictions.1storder,
-                restrictions.general,
-                restrictions.2ndorder,
+                  restrictions.1storder.EFA,
+                  restrictions.general,
+                    restrictions.2ndorder,
               summary.FA)
 
-exportMethods(BIC, logLik, 
-                fitS4, bfgs_fitS4, gr_fitS4, bfgs_helpS4, 
-                create_start, create_FAobject,
-                show, coef, vcov, plot, summary, confint, profile)
-
-# S3 methods
-S3method(deviance, FA)
-S3method(deviance, FA.general)
-S3method(deviance, FA.2ndorder)
-S3method(df.residual, FA)
-S3method(df.residual, FA.general)
-S3method(df.residual, FA.2ndorder)
-S3method(fitted, FA)
-S3method(fitted, FA.general)
-S3method(fitted, FA.2ndorder)
-S3method(influence, FA)
-S3method(influence, FA.general)
-S3method(influence, FA.2ndorder)
-S3method(model.matrix, FA)
-S3method(model.matrix, FA.general)
-S3method(model.matrix, FA.2ndorder)
-S3method(pairs, FA)
-S3method(pairs, FA.general)
-S3method(pairs, FA.2ndorder)
-S3method(predict, FA)
-S3method(predict, FA.general)
-S3method(predict, FA.2ndorder)
-S3method(residuals, FA)
-S3method(residuals, FA.general)
-S3method(residuals, FA.2ndorder)
-S3method(rstandard, FA)
-S3method(rstandard, FA.general)
-S3method(rstandard, FA.2ndorder)
+# Export formal S4 methods
+exportMethods(BIC, logLik, pairs, fitted, residuals, rstandard, weights, influence, df.residual, 
+              deviance, model.matrix, simulate, screeplot, show, coef, vcov, plot, summary,
+              confint, profile, predict,restrictions2model, fitS4, bfgs_fitS4, gr_fitS4, 
+              bfgs_helpS4, create_start, create_FAobject, restrictions2draws, restrictions2RAM, 
+              make_manifest, make_restrictions, loadings, cormat, uniquenesses, make_parameter)

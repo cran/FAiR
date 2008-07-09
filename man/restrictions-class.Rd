@@ -1,149 +1,221 @@
 \name{restrictions-class}
 \docType{class}
 \alias{restrictions-class}
+\alias{restrictions.independent-class}
 \alias{restrictions.factanal-class}
 \alias{restrictions.orthonormal-class}
 \alias{restrictions.1storder-class}
+\alias{restrictions.1storder.EFA-class}
 \alias{restrictions.general-class}
 \alias{restrictions.2ndorder-class}
 \alias{show,restrictions-method}
-\alias{show,restrictions.factanal-method}
-\alias{show,restrictions.orthonormal-method}
-\alias{show,restrictions.1storder-method}
-\alias{show,restrictions.general-method}
-\alias{show,restrictions.2ndorder-method}
 \title{Class "restrictions"}
 \description{
   It is not necessary to understand this help page if one merely
   wants to estimate a factor analysis model. This help page is 
   intended for those who want to modify or extend FAiR or otherwise
-  want some idea of how FAiR works ``behind the scenes''.\cr
+  want some idea of how \pkg{FAiR} works \dQuote{behind the scenes}.
 
   This class contains information in its slots about what restrictions 
-  are placed on a factor analysis model. As an overview, objects of class 
-  \code{"restrictions.factanal"} are handled by methods that are 
-  analagous to the algorithm in \code{\link[stats]{factanal}}. Objects
-  of class \code{"restrictions.orthonormal"} are handled by methods that 
-  estimate an exploratory factor analysis model with orthogonal factors
-  and zeros in the upper triangle of the coefficient matrix. Objects of
-  class \code{"restrictions.1storder"}, \code{"restrictions.general"}, and
-  \code{"restrictions.2ndorder"} are handled by methods that respecitvely  
-  estimate semi-exploratory or confirmatory models for a single equation model
-  with correlated factors, a model with a general second-order factor
-  and a model with multiple correlated second-order factors.
+  are placed on a factor analysis model, which defines the model to
+  be estimated.
 }
 \section{Objects from the Class}{
 Objects can be created by calls of the form \code{new("restrictions", ...)}.
-However, it is not recommended to do so in normal usage. \code{\link{make_restrictions}} provides a constructor that 
-reacts to the responses the user gives to the pop-up menus, but it too
-would rarely need to be called explicitly since it is called internally by
-\code{\link{Factanal}} when the \code{restrictions} argument to \code{\link{Factanal}} is unspecified. There are several examples of manual
-creation of objects of class \code{"restrictions"} in the tests.R file in the FAiR/tests subdirectory and in the examples for Factanal.Rd in the FAiR/man subdirectory.
+However, it is not recommended to do so in normal usage because 
+\code{\link{make_restrictions}} provides the constructor for users.
 }
 \section{Slots}{
-    An object of class "restrictions" has the following slots:
+    The \code{"restrictions"} class is virtual has the following slots:
  \describe{
-    \item{factors:}{Object of class \code{"numeric"}. A numeric vector of length two
-      indicating the number of factors in the model. In the case of a one-level model
-      the second element should be zero.}
-    \item{nvars:}{Object of class \code{"numeric"}. The number of
-      free parameter in the model, which corresponds to the \code{nvars}
-      argument to \code{\link[rgenoud]{genoud}}.}
-    \item{Domains:}{Object of class \code{"matrix"} A matrix with
-      \code{nvars} rows and two columns indicating the lower and upper
-      bounds for each free or potentially free parameter in the model,
-      which corresponds to the \code{Domains} argument to 
-      \code{\link[rgenoud]{genoud}}. }
-    \item{model:}{Object of class \code{"character"} A character
-      string indicating whether a SEFA, EFA, or CFA model is to be estimated.}
-    \item{method:}{Object of class \code{"character"} A character
-      string indicating whether MLE or YWLS is to be used to estimate
-      the model.}
+    \item{\code{factors}:}{An integer vector of length two indicating the number 
+      of factors at level one and level two of the model, must be nonnegative}
+    \item{\code{nvars}:}{An integer indicating the number of free parameters in the 
+      model, which corresponds to the \code{nvars} argument to 
+      \code{\link[rgenoud]{genoud}}.}
+    \item{\code{dof}:}{An integer indicating the number of degrees of freedom
+      for the factor analysis model}
+    \item{\code{Domains}:}{A numeric matrix with \code{nvars} rows and exactly two 
+      columns indicating the lower and upper bounds for each free parameter, 
+      which corresponds to the \code{Domains} argument to \code{\link[rgenoud]{genoud}}. }
+    \item{\code{model}:}{A character string indicating whether a \code{"SEFA"}, 
+      \code{"EFA"}, or \code{"CFA"} model is to be estimated.}
+    \item{\code{discrepancy}:}{A character string indicating which discrepancy function 
+       is used to estimate the model, see the options for the same argument to
+       \code{\link{make_manifest}}}
+    \item{\code{free}:}{A logical vector that indicates which of the parameters
+      in the various matrices are free and which are considered fixed, excluding
+      parameters that are \dQuote{obviously} fixed.}
   }
-   An object of class \code{"restrictions.factanal"} extends \code{"restrictions"} 
-   and has one additional slot, named \code{fast}, which is a logical that indicates
-   whether \code{\link[stats]{factanal}} should be called (essentially) in lieu of 
-   \code{\link[rgenoud]{genoud}}.\cr
-   An object of class \code{"restrictions.orthonormal"} extends \code{"restrictions"}
-   and has the following additional slots:
+  An object of class \code{"restrictions.independent"} inherits from 
+  \code{"restrictions"} and is used to define a \dQuote{null} model where there are
+  no factors (hence \code{factors = c(0L,0L)} ) and the only parameters to estimate
+  are the manifest standard deviatiations. It has two additional slots:
   \describe{
-    \item{Phi:}{An identity matrix with rows and columns equal to the number
-      of (first order) factors that serves as the orthogonal correlation 
-      matrix among the factors.}
-    \item{beta:}{A list with the following named elements: \code{beta}, 
-      which is a matrix with as many columns as there are outcome variables
-      and as many columns as there are factors. There should be zeros in the
-      upper triangle of this matrix and \code{NA_real_} elsewhere. \code{free}
-      is a logical vector indicating which cells of \code{beta} are 
-      \code{NA_real_}. \code{num_free} is a scalar indicating the number of
-      cells in \code{beta} that are \code{NA_real_}.}
-     \item{Theta2:}{A list with one named element, \code{Theta2}, which is
-       a diagonal covariance matrix of uniquenesses.}
-     \item{criteria:}{A list with one named element containing the function
-       for which the optimal parameters are sought, such as the 
-       log-likelihood function.}
+    \item{\code{scale}:}{an object of \code{\link{parameter.scale-class}}}
+    \item{\code{criteria}:}{A list with one function, the discrepancy function that will
+      be minimized to estimate the model and is that named by the \code{discrepancy} slot}
+   }
+   An object of class \code{"restrictions.factanal"} inherits from \code{"restrictions"}
+   but has the same slots. This class is used for exploratory factor analysis via the
+   same restrictions that are used in \code{\link{factanal}}. An object of class 
+   \code{"restrictions.orthonormal"} inherits from \code{"restrictions"} and also implies 
+   exploratory factor analysis but instead imposes the restrictions that the upper 
+   triangle of the coefficient matrix has all zeros. It has the following additional slots:
+  \describe{
+    \item{\code{beta}:}{an object of \code{\link{parameter.coef-class}} where the \code{x} 
+       slot is a primary pattern matrix with \eqn{0.0} in its upper triangle and \code{NA} 
+       elsewhere}
+    \item{\code{scale}:}{an object of \code{\link{parameter.scale-class}}}
+    \item{\code{criteria}:}{A list with one function, the discrepancy function that will
+      be minimized to estimate the model and is that named by the \code{discrepancy} slot}
   }
-  An object of class \code{"restrictions.1storder"} extends \code{"restrictions"}
-  and has the same additional slots as objects of class 
-  \code{"restrictions.orthonormal"}. There are, however, a few differences. First, 
-  \code{Phi} is a diagonal matrix with \eqn{0.5} in all of its diagonal elements. 
-  Second, the \code{criteria} slot can be a list with more than one 
-  function to be evaluated in the lexical optimization process. Third, the 
-  \code{beta} element of the \code{beta} slot can have any pattern of 
-  \code{NA_real_} and / or fixed numbers in its cells to indicate free and fixed 
-  coefficients respectively. Third, the \code{beta} slot has one or two additional
-  list elements. The first of these is \code{select} which is a logical
-  vector indicating which elements of the grand parameter vector correspond 
-  to free cells of the coefficient matrix. The second of these, which is 
-  included only when semi-exploratory factor analysis is utilized, is 
-  \code{fix_beta_args} and is itself a list with named elements corresponding 
-  to the important but not exported function \code{FAiR:::FAiR_fix_coefficients}.\cr
-
-  An object of class \code{"restrictions.general"} extends \code{"restrictions"} 
-  and has the same additional slots as objects of class 
-  \code{"restrictions.1storder"} with one addition:
+  An object of class \code{"restrictions.1storder"} inherits from \code{"restrictions"}
+  and is used for factor analysis models with multiple correlated factors. It has the
+  following additional slots:
   \describe{
-    \item{Delta:}{A list with the following named elements: \code{Delta}, 
-      which is a one-column matrix with as many rows as there are
-      first-order factors factors. Free elements of this matrix should 
-      be \code{NA_real_} and fixed elements should be specified as
-      numbers on the \eqn{(-1,1)} interval. \code{free} is a logical vector 
-      indicating which cells of \code{Delta} are  \code{NA_real_}. 
-      \code{num_free} is a scalar indicating the number of
-      cells in \code{Delta} that are \code{NA_real_}.}
+    \item{\code{Phi}:}{an object of \code{\link{parameter.cormat-class}}}
+    \item{\code{beta}:}{an object that inherits from \code{parameter.coef-class}. If
+      \code{model = "CFA"} it should be of \code{\link{parameter.coef-class}} or
+      \code{\link{parameter.coef.nl-class}}, depending on whether there are any nonlinear
+      exact restrictions to impose. If \code{model = "SEFA"}, it should be of
+      \code{\link{parameter.coef.SEFA-class}} or \code{\link{parameter.coef.SEFA.nl-class}},
+      again depending on whether there are any nonlinear exact restrictions to impose.
+      Unlike the case for \code{"restrictions.orthonormal"}, its \code{x} slot can have 
+      any combination of free and fixed cells.}
+    \item{\code{coef}:}{an object of \code{\link{parameter.scale-class}}}
+    \item{criteria}{A list of functions to be evaluated as lexical criteria during the
+      lexical optimization process. Hence, this list may contain more than one function
+      but the function named in the \code{discrepancy} slot must be the last element.
+      Preceeding list elements should be functions that return \eqn{-1.0} if the constraint
+      is satisfied and some number greater than \eqn{-1.0} if the constraint is not satisfied}
   }
-  An object of class \code{"restrictions.2ndorder"} extends \code{"restrictions"}
-  and has the same additional slots as objects of class 
-  \code{"restrictions.general"} with the following addition:
+  An object of class \code{"restrictions.1storder.EFA"} inherits from 
+  \code{"restrictions.1storder"} and is used for exploratory factor analysis after the
+  preliminary factors have been transformed. It has the following additional slots:
   \describe{
-    \item{Xi:}{A diagonal matrix with as many rows and columns as there are
-      second-order factors and has \eqn{0.5} in all its diagonal elements.}
-   } In addition, the \code{Delta} element of the \code{Delta} slot is a
-   matrix with more than one column to estimate the effect of multiple
-   second-order factors with any pattern of \code{NA_real_} and fixed
-   numbers to indicate free and fixed coefficients. Also, the \code{Delta} 
-   slot has additional list elements, \code{select} and possibly 
-   \code{fix_Delta_args}, which are analagous to the elements with the
-   corresponding names in the \code{beta} slot.
+    \item{\code{Lambda}:}{A numeric matrix with zeros in its upper triangle containing the 
+      preliminary factor loadings, in other words the \code{x} slot of the \code{beta}
+      slot of an object of class \code{"restrictions.orthonormal"}}
+    \item{orthogonal}{A logical indicating whether the transformation was orthogonal or
+      oblique. \code{\link{Rotate}} only supports oblique transformations, but it is 
+      possible to \dQuote{import} an orthogonal transformation from the \pkg{GPArotation}
+      package using the \code{\link{GPA2FA}} function}
+    \item{Tmat}{A square numeric matrix whose order is equal to the number of factors that
+      was found during the factor transformation process. Note that this matrix should
+      have unit-length \emph{columns}, whereas many textbooks instead specify unit-length
+      \emph{rows}}
+    \item{Tcriteria}{A list, usually containing functions that were used as lexical criteria
+      during the lexical optimization process (see \code{\link{Rotate}}) If the 
+      \pkg{GPArotation} package was used to find the transformation, then this list must
+      be a single character string naming the analytic criterion used}
+  }
+  An object of class \code{"restrictions.general"} inherits from 
+  \code{"restrictions.1storder"} and is used for SEFA and CFA with a single second-order 
+  factor that explains the systematic correlation among the first-order factors. It has one 
+  additional slot, 
+  \describe{
+     \item{\code{Delta}:}{an object of \code{\link{parameter.coef-class}} or 
+       \code{\link{parameter.coef.nl-class}}, depending on whether there are any
+       nonlinear exact restrictions to impose. Its \code{x} slot has only one column 
+       but it can have any combination of free and fixed cells}
+  }
+  An object of class \code{"restrictions.2ndorder"} inherits from \code{"restrictions.general"}
+  and is used for SEFA and CFA models with multiple second-order factors to explain the 
+  systematic correlation among the first-order factors. Its \code{Delta} slot now must
+  only inherit from \code{\link{parameter.coef-class}} and hence can also be 
+  \code{\link{parameter.coef.nl-class}} if \code{model = "CFA"} or, if 
+  \code{model = "SEFA"} can be of \code{\link{parameter.coef.SEFA-class}} or 
+  \code{\link{parameter.coef.SEFA.nl-class}}, again depending on whether there are any
+  nonlinear exact restrictions to impose at level two. The \code{"restrictions.2ndorder"}
+  class has one additional slot,
+  \describe{
+    \item{\code{Xi}:}{an object of \code{parameter.cormat-class}}
+  }
+}
+\section{Methods}{
+  \describe{
+    \item{show}{\code{signature(object = "restrictions")}, prints the object
+       in a relatively easy-to-digest format and there are tailored methods for almost
+       all of the classes that inherit from the \code{"restrictions"} class}
+  }
+  The following methods are listed here but documented elsewhere
+  \describe{
+    \item{restrictions2model}{the \code{\link{restrictions2model}} methods take a grand
+      parameter vector and \dQuote{fill} in the free cells of the appropriate matrices
+      with a \code{"restrictions"} object}
+    \item{fitS4}{the \code{\link{fitS4}} methods evaluate all the lexical criteria
+      given a \dQuote{filled} object that inherits from class \code{"restrictions"}}
+    \item{bfgs\_fitS4}{the \code{\link{bfgs_fitS4}} methods return the discrepancy function
+      given a \dQuote{filled} object that inherits from class \code{"restrictions"}}
+    \item{gr\_fitS4}{the \code{\link{gr_fitS4}} methods return the gradient of the discrepancy
+      function given a \dQuote{filled} object that inherits from class \code{"restrictions"}}
+    \item{bfgs\_fitS4}{the \code{\link{bfgs_fitS4}} methods return a list that is then passed
+      to the \code{\link{bfgs_fitS4}} and \code{\link{gr_fitS4}} methods; see the 
+      \code{BFGShelp} argument to \code{\link[rgenoud]{genoud}}}
+    \item{create\_start}{the \code{\link{create_start}} methods return a matrix of starting
+      values for the genetic algorithm; see also \code{\link[rgenoud]{genoud}}}
+    \item{create\_FAobject}{the \code{\link{create_FAobject}} methods return an object that
+      inherits from \code{\link{FA-class}} once the optimal estimates have been found}
+    \item{restrictions2draws}{the \code{\link{restrictions2draws}} methods return a list
+      of arrays of simulated draws from the sampling distribution of the estimated free
+      parameters}
+    \item{restrictions2RAM}{the \code{\link{restrictions2RAM}} methods convert an object
+      that inherits from class \code{"restrictions"} from that parameterization used in
+      the \pkg{FAiR} package to the reticular action model (RAM) parameterization used in 
+      the \pkg{sem} package}
+    \item{loadings}{the \code{\link{loadings}} methods extact the factor loadings}
+    \item{coef}{the \code{\link{coef,restrictions-method}}s also extract the factor loadings}
+    \item{cormat}{the \code{\link{cormat}} methods extract the correlation matrices among
+      factors}
+    \item{uniquenesses}{the \code{\link{uniquenesses}} methods extract the uniquenesses}
+    \item{fitted}{the \code{\link{fitted,restrictions-method}}s produce a correlation or
+      covariance matrix as a function of the model parameters}
+    \item{df.residual}{the \code{\link{df.residual,restrictions-method}}s extract the 
+      degrees of freedom for the factor analysis model}
+  }
 }
 \details{
-  Essentially, an object that inherits from class \code{"restrictions"} acts as
-  a vessel that contains matrices and necessary information to estimate
-  the corresponding model. The \code{par} argument to the methods for
-  \code{\link{fitS4-methods}}, \code{\link{bfgs_fitS4-methods}}, and
-  \code{\link{gr_fitS4-methods}} fills the free elements of the 
-  appropriate matrix and then the appropriate functions are evaluated in search
-  of the optimal parameters that satisfy the constraints. For more details, see
-  the Classes.R and S4methods.R files in the FAiR/R subdirectory.
+  These classes are fundamental in \pkg{FAiR} and fulfill two important roles. First, they
+  serve as a vessel that contains the parameter matrices and other necessary information to estimate
+  different factor analysis models via \code{\link{Factanal}}. During the genetic optimization
+  proccess, the \code{\link{restrictions2model}} method repeatedly calls 
+  \code{\link{make_parameter-methods}} to \dQuote{fill} the \dQuote{empty} \code{x} slots
+  of the matrices within the \code{"restrictions"} object that inherit from 
+  \code{\link{parameter-class}}. Eventually, the optimal parameters satisfying the 
+  specified constraints are found by the genetic algorithm and the \code{\link{create_FAobject}} 
+  creates an object that inherits from class \code{\link{FA-class}} on the basis of this 
+  \dQuote{filled} \code{"restrictions"} object. 
+
+  The second purpose of a \code{"restrictions"} object is to remind the user of exactly what 
+  restrictions were imposed during the estimation process, which is why a tailored 
+  \code{\link{show}} method is essential. 
+
+  Here is a table of the class hierarchy:
+\tabular{lll}{
+  \strong{Class} \tab \strong{Parent Class} \tab \strong{Corresponding Model}\cr
+  \code{"restrictions"}  \tab none \tab none (virtual class)\cr
+  \code{"restrictions.independent"} \tab \code{"retrictions"} \tab zero factor null model\cr
+  \code{"restrictions.factanal"} \tab \code{"restrictions"} \tab EFA via factanal algorithm\cr
+  \code{"restrictions.orthonormal"} \tab \code{"restrictions"} \tab EFA via a different algorithm\cr
+  \code{"restrictions.1storder"} \tab \code{"restrictions"} \tab Models with correlated 
+    factors\cr
+  \code{"restrictions.1storder.EFA"} \tab \code{"restrictions.1storder"} \tab 
+    EFA after factor transformation\cr
+  \code{"restrictions.general"} \tab \code{"restrictions.1storder"} \tab 
+    SEFA and CFA\cr
+  \code{"restrictions.2ndorder"} \tab \code{"restrictions.general"} \tab 
+    SEFA and CFA\cr
 }
-\author{Ben Goodrich \url{http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair}}
-\seealso{
-\code{\link{Factanal}} and \code{\link{S4GenericsFAiR}}
 }
+\author{Ben Goodrich}
+\seealso{\code{\link{make_restrictions}}}
 \examples{
 showClass("restrictions")
+showClass("restrictions.independent")
 showClass("restrictions.orthonormal")
 showClass("restrictions.1storder")
+showClass("restrictions.1storder.EFA")
 showClass("restrictions.general")
 showClass("restrictions.2ndorder")
 }

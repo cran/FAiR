@@ -7,123 +7,85 @@
 \alias{gr_fitS4}
 \alias{bfgs_helpS4}
 \alias{create_start}
-\alias{create_FAobject}
 \alias{fitS4-methods}
-\alias{fitS4,numeric,restrictions.factanal-method}
-\alias{fitS4,numeric,restrictions.orthonormal-method}
-\alias{fitS4,numeric,restrictions.1storder-method}
-\alias{fitS4,numeric,restrictions.general-method}
-\alias{fitS4,numeric,restrictions.2ndorder-method}
 \alias{bfgs_fitS4-methods}
-\alias{bfgs_fitS4,numeric,restrictions.factanal,ANY-method}
-\alias{bfgs_fitS4,numeric,restrictions.orthonormal,ANY-method}
-\alias{bfgs_fitS4,numeric,restrictions.1storder,list-method}
-\alias{bfgs_fitS4,numeric,restrictions.general,list-method}
-\alias{bfgs_fitS4,numeric,restrictions.2ndorder,list-method}
 \alias{gr_fitS4-methods}
-\alias{gr_fitS4,numeric,restrictions.factanal,ANY-method}
-\alias{gr_fitS4,numeric,restrictions.orthonormal,ANY-method}
-\alias{gr_fitS4,numeric,restrictions.1storder,list-method}
-\alias{gr_fitS4,numeric,restrictions.general,list-method}
-\alias{gr_fitS4,numeric,restrictions.2ndorder,list-method}
 \alias{bfgs_helpS4-methods}
-\alias{bfgs_helpS4,numeric,restrictions,logical-method}
-\alias{bfgs_helpS4,numeric,restrictions.orthonormal,logical-method}
-\alias{bfgs_helpS4,numeric,restrictions.1storder,logical-method}
-\alias{bfgs_helpS4,numeric,restrictions.general,logical-method}
-\alias{bfgs_helpS4,numeric,restrictions.2ndorder,logical-method}
 \alias{create_start-methods}
-\alias{create_start,restrictions-method}
-\alias{create_start,restrictions.factanal-method}
-\alias{create_start,restrictions.orthonormal-method}
-\alias{create_start,restrictions.1storder-method}
-\alias{create_start,restrictions.general-method}
-\alias{create_start,restrictions.2ndorder-method}
-\alias{create_FAobject-methods}
-\alias{create_FAobject,restrictions-method}
-\alias{create_FAobject,restrictions.factanal-method}
-\alias{create_FAobject,restrictions.orthonormal-method}
-\alias{create_FAobject,restrictions.1storder-method}
-\alias{create_FAobject,restrictions.general-method}
-\alias{create_FAobject,restrictions.2ndorder-method}
-
-\title{S4 Generic Functions and Methods for Package `FAiR'}
+\alias{fitS4,restrictions,manifest.basic-method}
+\alias{bfgs_fitS4,restrictions,manifest.basic-method}
+\alias{gr_fitS4,restrictions,manifest.basic-method}
+\alias{bfgs_helpS4,restrictions,manifest.basic-method}
+\alias{create_start,restrictions,manifest.basic-method}
+\title{S4 Generics \& Methods for Package `FAiR'}
 \description{
   It is not necessary to understand this help page if one merely
   wants to estimate a factor analysis model. This help page is 
   intended for those who want to modify or extend FAiR or otherwise
-  want some idea of how FAiR works ``behind the scenes''.\cr
-  These generic functions are used to create starting values for,
-  estimate, and encapsulate the results of a factor analysis model
-  that is estimated by \code{\link{Factanal}}. The various methods
-  for these models pertain to  different types of factor analysis models.
+  want some idea of how \pkg{FAiR} works \dQuote{behind the scenes}.
+
+  \code{\link{Factanal}} is just a wrapper around a call to 
+  \code{\link[rgenoud]{genoud}} in the \pkg{rgenoud} package. These S4
+  generic functions are passed to various arguments of
+  \code{\link[rgenoud]{genoud}} as part of the optimization process. With
+  the exception of the methods for \code{create_start}, it would be very
+  unusual for any of these methods to be called directly by the user.
 }
 \usage{
-fitS4(par, object, ...)
-bfgs_fitS4(par, object, helper, ...)
-gr_fitS4(par, object, helper, ...)
-bfgs_helpS4(initial, object, done, ...)
-create_start(restrictions, ...)
-create_FAobject(restrictions, ...)
+\S4method{fitS4}{restrictions,manifest.basic}(par, restrictions, manifest, lower, mapping_rule)
+\S4method{bfgs_fitS4}{restrictions,manifest.basic}(par, restrictions, manifest, helper, lower)
+\S4method{gr_fitS4}{restrictions,manifest.basic}(par, restrictions, manifest, helper, lower)
+\S4method{bfgs_helpS4}{restrictions,manifest.basic}(initial, restrictions, manifest, done, lower)
+\S4method{create_start}{restrictions,manifest.basic}(number, start, restrictions, manifest, reject)
 }
 \arguments{
-  \item{par}{A numeric vector containing values for all the free or 
-    parameters to be estimated, which corresponds to the \code{par} argument 
-    for \code{\link[rgenoud]{genoud}} and for \code{\link[stats]{optim}}.}
+  \item{par}{A numeric vector containing values for all the free parameters 
+    to be estimated, which corresponds to the \code{par} argument for 
+    \code{\link[rgenoud]{genoud}} and for \code{\link[stats]{optim}}.}
   \item{initial}{Same as \code{par}.}
-  \item{object}{In FAiR, this object is always inherits from class
-    \code{"restrictions"}, see \code{\link{restrictions-class}}.}
-  \item{helper}{An object, typically a list that contains necessary information 
-    for the \code{bfgs_fitS4} and \code{gr_fitS4} methods as documented in
+  \item{restrictions}{An object of \code{\link{restrictions-class}}.}
+  \item{manifest}{An object of \code{\link{manifest-class}}.}
+  \item{lower}{A small numeric scalar indicating the lower bound for positive
+     definiteness or minimum uniqueness; see the corresponding argument
+     to \code{\link{Factanal}}.}
+  \item{mapping\_rule}{a logical indicating whether to invoke the mapping rule in 
+     semi-exploratory models. It takes the value of \code{FALSE} when called by
+     \code{\link{optim}}.}
+  \item{helper}{A list that contains necessary information for the \code{bfgs_fitS4}
+    and \code{gr_fitS4} methods that is passed to the \code{BFGShelp} argument for 
     \code{\link[rgenoud]{genoud}}.}
   \item{done}{A logical indicating whether the optimization has terminated
-    or could terminate immediately if a stopping condition is met.}
-  \item{restrictions}{An object of that inherits from class \code{"restrictions"},
-    see \code{\link{restrictions-class}}.}
-  \item{\dots}{Further arguments to be passed to downstream functions}
+    or could terminate immediately if a stopping condition is met; see the
+    documentation of the \code{BFGShelp} argument to \code{\link[rgenoud]{genoud}}.}
+  \item{number}{An integer representing the number of starting values to create}
+  \item{start}{A numeric vector or matrix containing initial communality estimates}
+  \item{reject}{Logical indicating whether to reject starting values that fail the 
+    constraints required by the model}
+  \item{\dots}{Further arguments to be passed to downstream functions; not
+    currently used.}
 }
 \details{
-  None of these S4 generic functions have default methods; any additional
-  methods must be tailored to the specific factor analysis model being 
-  estimated.
-
-  The \code{fitS4} method is the function for which the optimal \code{par} is
-  sought and produces a numeric \emph{vector} of fit criteria. This method is passed 
-  to the \code{fn} argument of \code{\link[rgenoud]{genoud}} for \emph{lexical}
-  optimization. Thus, the last element of this vector should be fully continuous 
-  so that all ties are broken among unique individuals in the population of the 
-  genetic algorithm. For example, the last element is the value of the 
-  log-likelihood function when \code{method = "MLE"} is specified in the call to 
-  \code{\link{Factanal}}.
-
-  Lexical optimization can be seen as optimization with respect to the last
-  criterion produced by the \code{fitS4} method among indiivduals in the population
-  of the genetic algorithm with the same values on all previous criteria produced
-  by the \code{fitS4} method. Thus, previous elements of this vector of criteria
-  are values of \dQuote{constraint} criteria and by convention are operationalized
-  as piecewise functions of \code{par} that take the value of 1.0 if the constraint 
-  is satisfied and some value less than 1.0 when the constraint is not satisfied.
-  For example, the constraint that prevents Heywood cases takes the value of 1.0
-  when all specific variances are positive and takes the value of the minimum 
-  specific variance otherwise. In FAiR, \code{fitS4} is supplied with an additional
-  argument, \code{S}, which is the sample correlation matrix among outcomes.
+  The \code{fitS4} method is responsible for producing a complete numeric \emph{vector} of 
+  fit criteria and is passed to the \code{fn} argument of \code{\link[rgenoud]{genoud}}. 
+  The default method simply calls \code{\link{restrictions2model}} and then calls an internal
+  function that evaluates all the functions in the \code{criteria} slot of the object of 
+  \code{\link{restrictions-class}}.
 
   The \code{bfgs_fitS4} method produces a \emph{scalar} fit criterion, and this 
   method is passed to the \code{BFGSfn} argument of \code{\link[rgenoud]{genoud}}
   and is in turned passed to the \code{fn} argument of \code{\link{optim}}. Usually,
-  this criterion is the last criterion produced by the \code{fitS4} method, 
-  such as the log-likelihood. The \code{gr_fitS4} method produces the gradient
-  of the function defined by the \code{bfgs_fitS4} method, and this method is
-  passed to the \code{gr} argument of \code{\link[rgenoud]{genoud}} and 
+  this criterion is the last criterion produced by the \code{fitS4} method, which is the
+  discrepancy function. The \code{gr_fitS4} method produces the gradient
+  of the function defined by the \code{bfgs_fitS4} method under traditional maximum
+  likelihood estimation; otherwise it is an internal function. Either way, this function
+  is passed to the \code{gr} argument of \code{\link[rgenoud]{genoud}} and 
   \code{\link{optim}}. Both \code{bfgs_fitS4} and \code{gr_fitS4} take an
   argument called \code{helper}, which is produced by the \code{bfgs_helpS4}
   method and corresponds to the \code{BFGShelp} argument of 
-  \code{\link[rgenoud]{genoud}}. The \code{BFGShelp} method typically produces
-  a list that contains information about the initial value of the individual
-  when \code{optim} is called. In FAiR, the \code{bfgs_fitS4} methods and
-  \code{gr_fitS4} methods behave differently depending on the contents of
-  \code{helper}. In FAiR, each of these methods are supplied with an additional
-  argument, \code{S}, which is the sample correlation matrix among outcomes.\cr
+  \code{\link[rgenoud]{genoud}}. The \code{BFGShelp} method produces a list
+  that contains information about the initial value of the genetic individual
+  when \code{optim} is called. The \code{bfgs_fitS4} methods and \code{gr_fitS4}
+  methods can behave differently depending on the contents of \code{helper}.\cr
 
   The \code{create_start} method creates a matrix of starting values that is
   then passed to the \code{starting.values} argument of 
@@ -132,64 +94,27 @@ create_FAobject(restrictions, ...)
   values in the global environment and pass it through the \code{\dots} of
   \code{\link{Factanal}} to the \code{starting.values} argument of 
   \code{\link[rgenoud]{genoud}} yourself. See \code{\link{Factanal}} for details
-  on doing so. It is only necessary to write a \code{create_start} method
-  when extending the \code{\link{restrictions-class}} to implement a new kind
-  of factor analysis model. In FAiR, the \code{create_start} method is
-  supplied with additional arguments: \code{pop.size}, which corresponds to
-  the argument of the same name in \code{\link[rgenoud]{genoud}} and indicates
-  how many starting vectors to create; \code{start} which is a one-column matrix
-  containing the initially estimated communalities for the outcomes; and \code{S},
-  which is the sample correlation matrix among the outcome variables.
-
-  Finally, the \code{create_FAobject} takes the output of 
-  \code{\link[rgenoud]{genoud}} and produces an object of class "FA" or an
-  object that inherits from class "FA". In FAiR, the \code{create_FAobject}
-  method is supplied with additional arguments: \code{opt}, which is the 
-  list produced by \code{\link[rgenoud]{genoud}}; \code{manifest}, which
-  is a list containing the sample covariance matrix, sample correlation matrix,
-  and the number of observations in the sampe; and \code{call}, which is the
-  call to \code{\link{Factanal}}.
-
-  To summarize, in order to write a new method for FAiR, create a new class that
-  inherits from \code{\link{restrictions-class}}. Write a \code{fitS4} method
-  for this new class that calculates all criteria that you want to find the
-  \emph{lexical} optimum of, given \code{par}, this object, and \code{S}. Write a 
-  \code{bfgs_fitS4} method to calculate some scalar criterion. The \code{bfgs_fitS4} 
-  method would typically reuse a lot of code from the \code{fitS4} method or, in the 
-  case of all \code{bfgs_fitS4} methods currently implemented in FAiR, simply calls 
-  the \code{fit_S4} method and selects the first value of the vector that is not
-  equal to \eqn{1.0}. Write a \code{gr_fitS4} method that calculates the gradient
-  of the \code{bfgs_fitS4} method at \code{par}, which will also reuse a lot of
-  code from the \code{fitS4} method. If you want to do anything fancy with the
-  \code{bfgs_fitS4} and \code{gr_fitS4} methods write a \code{bfgs_helpS4} method 
-  that evaluates the \code{fitS4} method at \code{initial} and passes the result
-  to the \code{bfgs_fitS4} and \code{gr_fitS4} methods via their \code{helper}
-  argument. Finally, write a \code{create_FAobject} method that produces an
-  object of class \code{"FA"} or that inherits from class \code{"FA"} (in which
-  case you would need to define that class and at least write \code{summary} 
-  methods for it). It is recommended to also write a \code{create_start} method
-  that creates starting values in light of the \code{fitS4} method. Starting
-  values should ideally be widely dispersed throughout the subset of the 
-  parameter space where all of the constraints are satisfied. For each of these
-  methods, the existing methods in FAiR provide a good template to start from.
+  on doing so.
 }
 \section{Methods}{
-  See the examples below. The essential concept is that the estimation behavior
-  depends on \code{object} and \code{restrictions} which is an object of
-  a class that inherits from the \code{"restrictions"} superclass. See also 
-  \code{\link{restrictions-class}}.
+  There are methods for every flavor of \code{\link{restrictions-class}}, although in 
+  many cases the methods are simply inherited. Currently, there are only methods for
+  objects of class \code{"manifest.basic"}, which are inherited by objects of class
+  \code{"manifest.data"} and \code{"manifest.data.mcd"}. However, it is possible to
+  tailor methods for different flavors of \code{\link{manifest-class}} or to create 
+  new classes that inherit from  \code{\link{restrictions-class}} and write (some) 
+  methods for them.
 }
 \value{
-  \item{fitS4}{produces a numeric vector}
-  \item{bfgs_fitS4}{produces a numeric scalar}
-  \item{gr_fitS4}{produces a numeric vector}
-  \item{bfgs_helpS4}{typically produces a list}
-  \item{create_start}{produces a numeric matrix}
-  \item{create_FAobject}{produces an object that is or inherits from
-    class "FA"}
+  \item{fitS4}{produces a numeric vector of fits}
+  \item{bfgs_fitS4}{produces a numeric scalar as a fit}
+  \item{gr_fitS4}{produces a numeric vector that is the gradient at the scalar fit}
+  \item{bfgs_helpS4}{produces a list of ancillary material for \code{bfgs_fitS4} and
+     \code{gr_fitS4}}
+  \item{create_start}{produces a numeric matrix that constitutes the starting population}
 }
-\author{Ben Goodrich \url{http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair}}
-\seealso{\code{\link{Factanal}}, \code{\link{restrictions-class}} and 
+\author{Ben Goodrich}
+\seealso{\code{\link{Factanal}}, \code{\link{manifest-class}}, \code{\link{restrictions-class}} and 
   \code{\link[rgenoud]{genoud}}}
 \examples{
   showMethods("fitS4")
@@ -197,7 +122,6 @@ create_FAobject(restrictions, ...)
   showMethods("gr_fitS4")
   showMethods("bfgs_helpS4")
   showMethods("create_start")
-  showMethods("create_FAobject")
 }
 \keyword{ methods }
 \keyword{ multivariate }

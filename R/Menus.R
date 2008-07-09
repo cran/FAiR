@@ -1,10 +1,29 @@
+#     This file is part of FAiR, a program to conduct Factor Analysis in R
+#     Copyright 2008 Benjamin King Goodrich
+#
+#     FAiR is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU Affero General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     FAiR is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU Affero General Public License for more details.
+#
+#     You should have received a copy of the GNU Affero General Public License
+#     along with FAiR.  If not, see <http://www.gnu.org/licenses/>.
+
 ## This file contains GUI-related functions
 
 ## NOTE: This file is meant to be read with 90 columns and 8 space tabs
 
-FAiR_get_answer <- # everything below goes through this function
+## get an answer from the user; everything below goes through this function
+FAiR_get_answer <-
 function(text, yesno = FALSE, radio_items = NULL, select = 1,
-	seq_args = NULL, check_args = NULL) {
+	seq_args = NULL, check_args = NULL, message = NULL) {
+
+	options(guiToolkit = "RGtk2") # must use RGtk2 for GUI
 	the.env <- new.env()
 	group <- ggroup(horizontal = FALSE)
 	glabel(text, container = group)
@@ -17,8 +36,9 @@ function(text, yesno = FALSE, radio_items = NULL, select = 1,
 		else gobject <- gradio(radio_items, selected = select, container = group)
 	}
 	else if(!is.null(seq_args)) {
-		gobject <- gspinbutton(from = seq_args$from, to = seq_args$to, 
-			by = seq_args$by, value = seq_args$value, container = group)
+		gobject <- gslider(from = seq_args$from, to = seq_args$to, 
+			by = seq_args$by, value = seq_args$value, 
+			horizontal = seq_args$horizontal, container = group)
 	}
 	else if(!is.null(check_args)) {
 		gseparator(horizontal = FALSE, container = group)
@@ -26,15 +46,21 @@ function(text, yesno = FALSE, radio_items = NULL, select = 1,
 					checked = check_args$checked,
 					container = group)
 	}
-	gbasicdialog(title = if(!is.null(check_args)) 
+	if(!is.null(message)) {
+		gseparator(horizontal = TRUE, container = group)
+		glabel(message, container = group)
+	}
+	flush.console()
+	cat("Note: The GUI may hide behind your other windows at any time.\n")
+	flush.console()
+	gbasicdialog(title = if(!is.null(check_args))
 			"Please select (multiple selections possible)" else
 			"Please select one",
-			widget = group,
+			widget = group, #parent = group,
 			handler = function(h,...) {
 					assign("out", value = svalue(gobject),
 						envir = h$action)
-			}, action = the.env,
-			container = group, toolkit = guiToolkit("RGtk2"))
+			}, action = the.env, toolkit = guiToolkit("RGtk2"))
 	if(exists("out", envir = the.env)) {
 		out <- get("out", envir = the.env)
 		return(out)
@@ -42,6 +68,35 @@ function(text, yesno = FALSE, radio_items = NULL, select = 1,
 	else stop("Cancelled", call. = FALSE)
 }
 
+## ask user to edit stuff
+FAiR_edit <-
+function(instructions, mat) {
+	options(guiToolkit = "RGtk2") # must use RGtk2 for GUI
+	the.env <- new.env()
+	group <- ggroup(horizontal = FALSE)
+	glabel(instructions, container = group, anchor = c(-1,-1))
+	flush.console()
+	cat("One moment please\n")
+	flush.console()
+	obj <- gdf(as.data.frame(mat), container = group, expand = TRUE)
+	gbasicdialog(title = "Editing needed",
+			widget = group, #parent = group,
+			handler = function(h,...) {
+				assign("out", value = obj[,1:ncol(obj),drop = FALSE],
+					envir = h$action)
+			}, action = the.env, toolkit = guiToolkit("RGtk2"))
+	if(exists("out", envir = the.env)) {
+		out <- get("out", envir = the.env)
+		if(any(sapply(out, is.character))) {
+			for(i in 1:ncol(out)) out[,i] <- as.numeric(out[,i])
+		}
+		return(as.matrix(out))
+	}
+	else stop("Cancelled", call. = FALSE)
+}
+
+
+## ask user which model to estimate
 FAiR_get_model <-
 function() {
 	items  <- c("Semi-Exploratory Factor Analysis", "Exporatory Factor Analysis",
@@ -54,934 +109,1295 @@ function() {
 	return(answer)
 }
 
-FAiR_get_method <-
-function() {
-	items  <- c("Maximum likelihood", "Yates (1987) Weighted Least Squares")
-	answer <- FAiR_get_answer(text = "How would you like to estimate the model?",
-				radio_items = items)
-	if(answer == items[1]) answer <- "MLE"
-	else answer <- "YWLS"
-	return(answer)
-}
-
-FAiR_get_algorithm <-
+## ask user which algorithm to use to estimate EFA model
+FAiR_get_algorithm <- 
 function() {
 	text  <- "What algorithm would you like to use?"
-	items <- c("call factanal() [fast]", paste("use the factanal() objective function",
+	items <- c("call factanal() [fast]",paste("use the factanal() objective function",
 		   "with RGENOUD [slower but more reliable]"), paste("CFA with zeros in",
 		   "upper triangle of coefficient matrix [slower and less reliable]"))
 	answer <- FAiR_get_answer(text, radio_items = items)
 	return(which(items == answer))
 }
 
-FAiR_yesno <-
-function(question, selected = 1) {
-	answer <- FAiR_get_answer(text = question, yesno = TRUE, select = selected)
+## ask user a yes or no question
+FAiR_yesno <- 
+function(question, selected = 1, message = NULL) {
+	answer <- FAiR_get_answer(text = question, yesno = TRUE, 
+				select = selected, message = message)
 	return(answer == "Yes")
 }
 
-FAiR_get_number <-
-function(text, from, to, by, value) {
-	return(FAiR_get_answer(text, seq_args = list(from = from, to = to,
-							by = by, value = value)))
+## ask user to supply a number
+FAiR_get_number <- 
+function(text, from, to, by, value, message = NULL, horizontal = TRUE) {
+	return(FAiR_get_answer(text, seq_args = list(from = from, to = to, by = by,
+							value = value, message = message, 
+							horizontal = horizontal)))
 }
 
-FAiR_get_fix_coefficients_args <- 
-function(factors, level, fixed){
-	text <- paste("Would you like to put extra stipulations on the zeros at level",
+## establish arguments for the mapping rules defined in FAiR/R/Classes.R mapping_rule()
+FAiR_get_mapping_rule_args <- 
+function(x, level, choice_mr, choice_zeros){
+	factors <- ncol(x)
+	text <- paste("Are you sure you would like to change the mapping rule at level",
 			level, "?")
-	items <- c("No, I just want plain zeros",
-		"Encourage cohyperplanarity (revisionist Yates 1987)",
+	items <- c("No, I just want plain zeros", 
+		"At least one zero per factor on a high communality variable", 
+		if(factors > 2) "Encourage cohyperplanarity (revisionist Yates 1987)",
+# 		if(factors > 2) "Encourage cohyperplanarity via MCD estimator",
 		paste(factors, "outcomes of complexity", factors - 1, 
-			"for each factor (weaker Thurstone)"),
+			"for each factor (weaker Thurstone)"), if(factors > 3)
+		paste(0.5 * factors *  (factors - 1), "outcomes each of complexity",
+					factors - 2),
 		"Unit complexity basis (revisionist Butler 1969)", 
 		"Set the maximum complexity for each outcome")
-	names(items) <- c("none", "quasi_Yates", "weak_Thurstone", 
+	names(items) <- c("none", "communality", if(factors > 2) "quasi_Yates", 
+# 			if(factors > 2) "mve", 
+			"weak_Thurstone", if(factors > 3) "viral",
 			"Butler", "row_complexity")
-
-	answer <- FAiR_get_answer(text = text, radio_items = items)
-	arg_list <- formals(FAiR_fix_coefficients)
+	if(choice_mr) answer <- FAiR_get_answer(text = text, radio_items = items)
+	else          answer <- items[1]
+	arg_list <- formals(mapping_rule)
 	arg_list[[names(arg_list) %in% names(which(items == answer))]] <- TRUE
-	if(which(items == answer) == 5) { # row_complexity
-		text <- "Would you like to set the same complexity for *all* outcomes?"
-		allsame <- FAiR_yesno(question = text)
-		if(allsame) {
-			text <- paste("Choose the maximum complexity for all outcomes\n",
-				      factors - 1, "= Thurstonian Simple Structure ...", 
-				      "1 = Perfect Clustering")
-			arg_list$row_complexity <- FAiR_get_number(text, from = 1, 
-								by = 1, to = factors - 1, 
-								     value = factors - 1)
-		}
-		else {
-			text <- paste("What complexity would you like to use for *most*",
-				      "outomes?\nYou will have the opportunity to change",
-				      "this number for specific outcomes momentarily.")
-			row_complexity <- FAiR_get_number(text, from = 1, by = 1,
-							  to = factors, value = factors - 1)
-			row_complexity <- matrix(row_complexity, nrow = nrow(fixed))
-			rownames(row_complexity) <- rownames(fixed)
-			text <- paste("After pressing OK, please edit the complexity for",
-				      "each outome.\nWhen finished click the x at the",
-				      "upper right of the editor")
-			gmessage(text)
-			title <- "Complexity for each test"
-			row_complexity <- edit(row_complexity, title = title, 
-					      edit.row.names = TRUE)
+	if(names(which(items == answer)) == "row_complexity") {
+		text <- paste("What complexity would you like to use for *most*",
+				"outcomes at level", level, "?")
+		row_complexity <- FAiR_get_number(text, from = 1, by = 1, to = factors,
+						  value = factors - 1, message = message)
+		row_complexity <- matrix(as.integer(row_complexity), nrow = nrow(x))
+		rownames(row_complexity) <- rownames(x)
+		colnames(row_complexity) <- "complexity"
+		text <- paste("Please edit the following matrix to specify the\n",
+				"complexity of each outcome at level", level)
+		row_complexity <- FAiR_edit(text, row_complexity)
+		invalid <- any(row_complexity > factors) | any(row_complexity < 1)
+		while(invalid) {
+			gmessage(paste("Each complexity must be between 1 and",
+					factors, "inclusive. Try again."))
+			row_complexity <- FAiR_edit(text, row_complexity)
 			invalid <- any(row_complexity > factors) | any(row_complexity < 1)
-			while(invalid) {
-				gmessage(paste("Each complexity must be between 1 and",
-						factors, "inclusive. Try again."))
-				row_complexity <- edit(row_complexity, title = title, 
-						      edit.row.names = TRUE)
-				invalid <-  any(row_complexity > factors) | 
-					    any(row_complexity < 1)
-			}
-			arg_list$row_complexity <- c(row_complexity)
 		}
+		uniques <- unique(c(row_complexity)) 
+		if(length(uniques) == 1) arg_list$row_complexity <- row_complexity[1]
+		else arg_list$row_complexity <- c(row_complexity)
+	}
+	else if(names(which(items == answer)) == "mve") { # disabled
+		text <- paste("Note this mapping rule is painfully slow and essentially",
+				"requires that all outcomes are scored so as to be",
+				"positively correlated with the primary factors", 
+				"Click 'Cancel' at the next opportunity if this",
+				"bothers you.")
+		gmessage(text)
 	}
 
-	text <- paste("Would you like to (default) require", factors,
-			"exact zero coefficients for\neach factor at level",
-			level, ", inclusive of any zeros at fixed positions?")
-	zeros <- FAiR_yesno(text)
-	if(!zeros) {
-		zeros <- matrix(factors, ncol = factors)
-		colnames(zeros) <- paste(level, "_Factor_",
-					1:factors, sep = "")
-		text  <- paste("After pressing OK, please edit",
-			"the number of zeros required for",
-			"each factor at level", level, ". Note that",
-			"the number of zeros for each factor must be at least", 
-			factors - 1, ", inclusive of any zeros at fixed positions.",
-			"When finished, press the x in the top right of the editor.")
-		invalid <- TRUE
-		while(invalid) {
-			gmessage(text)
-			zeros <- edit(zeros, edit.row.names = FALSE)
-			if(all(zeros[1,] >= (factors - 1))) invalid <- FALSE
-			else {
-				gmessage(paste("The number of zeros for each factor",
-					"must be at least", factors - 1, ". Try again."))
-				zeros[1,] <- factors
-			}
+	text <- paste(" Are you sure you would like to change the number\n",
+			"of zero coefficients per factor at level", level, "from",
+			factors, "to\n something else?" )
+	message <- paste(" If so, after pressing OK, please specify the required\n",
+			"number of exact zeros for each factor, *inclusive* of\n",
+			"any zeros previously specified in specific cells.")
+	if(choice_zeros) zeros <- FAiR_yesno(text, message = message)
+	else             zeros <- FALSE
+
+	if(zeros) {
+		zeros <- rep(NA_integer_, factors)
+		for(i in 1:length(zeros)) {
+			text <- paste("Required number of zeros for factor", i,
+					"at level", level)
+			zeros[i] <- FAiR_get_number(text=text, from = factors - 1, by = 1,
+						to = nrow(x) - 3, value = factors)
 		}
 	}
 	else zeros <- rep(factors, factors)
-	arg_list$zeros <- c(zeros)
+	arg_list$zeros <- zeros
 	return(as.list(arg_list))
 }
 
-FAiR_bounds_cormat <-
-function(factors, level) {
-	if(factors == 1) return(NULL)
-	row_names <- NULL
-	for(i in 1:(factors - 1)) for(j in (i+1):factors) { 
-		row_names <- c( row_names, if(level == 1) 
-				paste("Phi_", i, j, sep = "") else
-				paste( "Xi_", i, j, sep = "") )
+## establish bounds on the off-diagonals of a correlation matrix
+FAiR_bounds_cormat <- 
+function(x, level, choice) {
+	factors <- ncol(x)
+	if(factors == 1) stop("cannot set bounds on a 1x1 correlation matrix")
+
+	Domains <- array(cbind( array(-1 + .Machine$double.eps, c(factors, factors)),
+				array( 1 - .Machine$double.eps, c(factors, factors))),
+			dim = c(factors, factors, 2))
+	mark <- upper.tri(Domains[,,1])
+	for(i in 1:2) {
+		diag(Domains[,,i]) <- 1
+		Domains[,,i][mark] <- Inf
 	}
-	text <- paste("Would you like to place any non-trivial",
-			"bounds on\nthe correlations among the",
-			factors, "factors", "at level", level, "?\n",
-			"If not, the valid interval will be (-1,1).")
-	bounds <- FAiR_yesno(text, select = 2)
-	if(bounds) {
-		lowers <- matrix(NA_real_, nrow = factors, ncol = factors)
-		lowers[upper.tri(lowers)] <- -1.0 + .Machine$double.eps
-		diag(lowers) <- 1.0
-		colnames(lowers) <- rownames(lowers) <- paste(
-			"Factor_", 1:factors, sep = "")
+	mark <- lower.tri(Domains[,,1])
+	if(choice) {
+		mat  <- cbind(lower = Domains[,,1][mark], upper = Domains[,,2][mark])
+		rn <- as.character(NULL)
+		letter <- if(level == 1) "F" else "G"
+		for(i in 2:(factors)) for(j in 1:(i - 1)) {
+			rn <- c(rn, paste(letter, i, " <-> ", letter, j, sep = ""))
+		}
+		rownames(mat) <- rn
+		text <- paste("Please edit the bounds on the correlations between\n",
+				"primary factors at level", level, ". Press OK when",
+				"finished")
 		invalid <- TRUE
 		while(invalid) {
-			text <- paste("After pressing OK, please edit",
-				"the lower bounds on the correlations",
-				"among the factors at level", level, "above the",
-				"diagonal and then press the x at the top right of the editor")
-				
-			gmessage(text)
-			text <- paste("Lower bounds among factors at level", level)
-			lowers <- edit(lowers, title = text, edit.row.names = TRUE)
-			if(all(lowers[upper.tri(lowers)] > -1)) break
-			text <- paste("All bounds on correlations must be greater",
-					"than -1.0. Try again.")
-			gmessage(text)
+			mat <- FAiR_edit(text, mat)
+			if(all(mat[,1] >= -1) & all(mat[,2] <= 1) &
+			   all(mat[,1] <= mat[,2]) ) break
+			message <- paste("All bounds on correlations must be on the",
+					"[-1.0, 1.0] interval and consistent. Try again.")
+			gmessage(message)
 		}
-
-		uppers <- lowers
-		uppers[upper.tri(uppers)] <- 1.0 - .Machine$double.eps
-		while(invalid) {
-			text <- paste("After pressing OK, please edit",
-				"the upper bounds on the correlations",
-				"among the factors at level", level, "above the",
-				"diagonal and then press the x at the top right of the editor")
-			gmessage(text)
-			text <- paste("Upper bounds among factors at level", level)
-			uppers <- edit(uppers, title = text, edit.row.names = TRUE)
-			if(all(uppers[upper.tri(uppers)] < 1)) break
-			text <- paste("All bounds on correlations must be less",
-					"than 1.0. Try again.")
-			gmessage(text)
-		}
-		Domains <- cbind(lowers[upper.tri(lowers)], uppers[upper.tri(uppers)])
-		rownames(Domains) <- row_names
-	}
-	else if(factors == 2) { 
-		Domains <- cbind(-1 + .Machine$double.eps, 1 - .Machine$double.eps)
-		rownames(Domains) <- if(level == 1) "Phi_12" else "Xi_12"
-	}
-	else {
-		Domains <- cbind(-1 + .Machine$double.eps, rep(1 - .Machine$double.eps,
-				0.5 * factors * (factors - 1)))
-		rownames(Domains) <- row_names
+		Domains[,,1][mark] <- mat[,1]
+		Domains[,,2][mark] <- mat[,2]
 	}
 	return(Domains)
 }
 
-FAiR_bounds_coefficients <-
-function(fixed, level) {
-	thing <- if(level == 1) 1 else if(ncol(fixed) == 1) 2 else 3
-	text <- paste("Would you like to place any non-trivial bounds\non",
-			"any of the (free) coefficients at level", level, "?\n",
-			"If not, the valid inteval will be", 
-			switch(thing, "[-1.5, 1.5]", "[-1.0, 1.0]", "[-1.5, 1.5]"), ".")
-	bounds <- FAiR_yesno(text, select = 2)
-	if(bounds) {
+## establish bounds on a primary pattern coefficient matrix
+FAiR_bounds_coef <- 
+function(x, level, choice) {
+	thing <- if(level == 1) 1 else if(ncol(x) == 1) 2 else 3
+	items <- c(paste("Change lower bound (currently ", 
+			switch(thing, -1.5, -1.0, -1.5), ")", sep = ""), 
+			paste("Change upper bound (currently ",
+			switch(thing,  1.5,  1.0,  1.5), ")", sep = "") )
+	names(items) <- c("lower", "upper")
+	text <- paste("Are you sure would you like to place non-trivial bounds\non",
+			"some of the (free) coefficients at level", level, "?")
+	check_args <- list(items = items, checked = c(TRUE, FALSE))
+	if(choice) bounds <- FAiR_get_answer(text, check_args = check_args)
+	else       bounds <- as.character(NULL)
+
+	if(length(bounds) && "lower" %in% names(bounds)) {
 		text <- paste("What number would you like to use as a lower bound",
-				"for *most* of the coefficients?\nYou will have an",
-				"opportunity to alter this number for specific",
-				"coefficients momentarily.")
-		num <- FAiR_get_number(text, from = switch(thing, -10, -1.0, -10),
-					to = switch(thing, 1.5, 1.0, 1.5), by = .1,
-					value = switch(thing, -1.5, -1.0, -1.5))
-		lowers <- matrix(num, nrow = nrow(fixed), ncol = ncol(fixed))
-		rownames(lowers) <- rownames(fixed)
-		colnames(lowers) <- colnames(fixed)
-		lowers[!is.na(fixed)] <- fixed[!is.na(fixed)]
-		if(level == 1) {
-			text <- paste("After pressing OK, please edit the lower bounds",
-			  		"on the coefficients at level 1.", 
-					"Note that it is theoretically",
-					if(ncol(fixed) > 1) "possible" else "impossible",
-					"for a coefficient to be less than -1.0.\n",
-					"When finished press the x at the top right of the editor.")
-		}
-		else {
-			text <- paste("After pressing OK, please edit the lower bounds",
-			  		"on the coefficients at level 2.", 
-					"Note that it is theoretically",
-					if(ncol(fixed) > 1) "possible" else "impossible",
-					"for a coefficient to be less than -1.0.\n",
-					"When finished press the x at the top right of the editor.")
-		}
+				"for *most* of the coefficients at level", level, "?")
+		num <- FAiR_get_number(text, from = switch(thing, -3, -1.0, -3), to = 0, 
+					by = .1, value = switch(thing, -1.5, -1.0, -1.5))
+		lowers <- matrix(num, nrow = nrow(x), ncol = ncol(x))
+		rownames(lowers) <- rownames(x)
+		colnames(lowers) <- colnames(x)
+		lowers[!is.na(x)] <- x[!is.na(x)]
 		invalid <- TRUE
+		text <- paste("Please edit this matrix to specify lower bounds",
+				"on each coefficient at level", level, "\n",
+				"Recall that coefficients are parameterized for",
+				"*standardized* variables.\nPress OK when finished.")
 		while(invalid) {
-			gmessage(text)
-			lowers <- edit(lowers, edit.row.names = TRUE)
-			if( (ncol(fixed) == 1) && any(lowers < -1) ) {
+			lowers <- FAiR_edit(text, lowers)
+# 			lowers <- edit(lowers, edit.row.names = TRUE)
+			if( (ncol(x) == 1) && any(lowers < -1) ) {
 				gmessage("All bounds must be greater than -1.0")
 			}
 			else break
 		}
+	}
+	else lowers <- array(switch(thing, -1.5, -1.0, -1.5), dim(x))
 
+	if(length(bounds) && "upper" %in% names(bounds)) {
 		text <- paste("What number would you like to use as an upper bound",
-				"for *most* of the coefficients?\nYou will have an",
-				"opportunity to alter this number for specific",
-				"coefficients momentarily.")
-		num <- FAiR_get_number(text, from = switch(thing, -1.5, -1.0, -1.5), 
-					to = switch(thing, 10, 1.0, 10), by = .1,
-					value = switch(thing, 1.5, 1.0, 1.5))
-		uppers <- matrix(num, nrow = nrow(fixed), ncol = ncol(fixed))
-		uppers[!is.na(fixed)] <- fixed[!is.na(fixed)]
-		rownames(uppers) <- rownames(fixed)
-		colnames(uppers) <- colnames(fixed)
-		if(level == 1) {
-			text <- paste("After pressing OK, please edit the upper bounds",
-			  		"on the coefficients at level 1.", 
-					"Note that it is theoretically",
-					if(ncol(fixed) > 1) "possible" else "impossible",
-					"for a coefficient to be greater than 1.0.\n",
-					"When finished press the x at the top right of the editor.")
-		}
-		else {
-			text <- paste("After pressing OK, please edit the upper bounds",
-			  		"on the coefficients at level 2.", 
-					"Note that it is theoretically",
-					if(ncol(fixed) > 1) "possible" else "impossible",
-					"for a coefficient to be greater than 1.0.\n",
-					"When finished press the x at the top right of the editor.")
-		}
+				"for *most* of the coefficients at level", level, "?")
+
+		num <- FAiR_get_number(text, from = 0, to = switch(thing, 3, 1.0, 3), 
+					by = .1, value = switch(thing, 1.5, 1.0, 1.5))
+		text <- paste("Please edit this matrix to specify upper bounds",
+				"on each coefficient at level", level, "\n",
+				"Recall that coefficients are parameterized for",
+				"*standardized* variables.\nPress OK when finished.")
+		uppers <- matrix(num, nrow = nrow(x), ncol = ncol(x))
+		uppers[!is.na(x)] <- x[!is.na(x)]
+		rownames(uppers) <- rownames(x)
+		colnames(uppers) <- colnames(x)
+		invalid <- TRUE
 		while(invalid) {
-			gmessage(text)
-			uppers <- edit(uppers, edit.row.names = TRUE)
-			if( (ncol(fixed) == 1) && any(lowers > 1) ) {
+			uppers <- FAiR_edit(text, uppers)
+# 			uppers <- edit(uppers, edit.row.names = TRUE)
+			if( (ncol(x) == 1) && any(lowers > 1) ) {
 				gmessage("All bounds must be less than 1.0")
+			}
+			else if(any(lowers > uppers)) {
+				gmessage(paste("All upper bounds must be greater than or",
+						"equal to the lower bounds"))
 			}
 			else break
 		}
-		Domains <- cbind(c(lowers), c(uppers))
 	}
-	else {
-		bound <- switch(thing, 1.5, 1.0, 1.5)
-		Domains <- cbind(-bound, rep(bound, prod(dim(fixed))))
-	}
-	row_names <- NULL
-	for(i in 1:ncol(fixed)) row_names <- c(row_names, 
-						paste(rownames(fixed), "_", i, sep = ""))
-	rownames(Domains) <- row_names
+	else uppers <- array(switch(thing, 1.5, 1.0, 1.5), dim(x))
+
+	Domains <- array(cbind(lowers, uppers), dim = c(dim(x), 2))
+# 	rn <- as.character(NULL)
+# 	for(i in 1:ncol(x)) rn <- c(rn, paste(rownames(x), "_", i, sep = ""))
+# 	rownames(Domains) <- row_names
+# 	Domains <- Domains[coef@free,]
 	return(Domains)
 }
 
-FAiR_peg_coefficients <-
+## fix specific cells of a primary pattern coefficient matrix to specific numbers
+FAiR_peg_coefficients <- 
 function(coefs, level) {
-	text <- paste("After pressing OK, please edit the following matrix",
-			"to restrict coefficients to specified values at level",
-			level, ".\nLeave any *unrestricted* coefficients as NA.\n",
-			"When finished press the x at the top right of the editor.")
-	gmessage(text)
-	text <- paste("Matrix of restricted coefficients")
+	text <- paste("Please edit this *standardized* pattern matrix",
+			"at level", level, "\nto designate particular coefficients",
+			"as fixed parameters.\nUse finite numbers to fix a",
+			"coefficient to that number;\nuse Inf if the coefficient",
+			"will be a function of other coefficients.\nLeave",
+			"any *unrestricted* coefficients as NA.\nPress OK",
+			"when finished")
 	rows <- nrow(coefs)
 	cols <- ncol(coefs)
-	coefs <- edit(coefs, title = text, edit.row.names = TRUE)
+	coefs <- as.data.frame(coefs)
+	for(i in 1:cols) coefs[,i] <- as.character(coefs[,i])
+	coefs <- FAiR_edit(text, coefs)
 	invalid <- cols == 1
 	while(invalid) {
 		if(all(coefs >= -1.0, na.rm = TRUE) & 
 		   all(coefs <=  1.0, na.rm = TRUE)) break
 		gmessage("All coefficients must be on the [-1.0,1.0] interval, try again")
-		coefs <- edit(coefs, title = text, edit.row.names = TRUE)
+		coefs <- FAiR_edit(text, coefs)
 	}
 	return(coefs[1:rows,1:cols,drop = FALSE])
 }
 
-FAiR_criterionator_extraction <-
-function(levels, factors, method, criteria) {
-	if(!is.null(criteria)) {
-		if(!is.list(criteria)) {
-			stop("'criteria' must be a list or left unspecified")
-		}
-		else if(length(criteria) > 0) {
-			for(i in 1:length(criteria)) {
-				if(is.character(criteria[[i]])) { 
-					criteria[[i]] <- get(paste("FAiR_criterion_",
-								criteria[[i]], sep = ""))
-				}
-				else if(!is.function(criteria[[i]])) {
-					stop("criteria must be a list of character",
-					     " strings or functions, it is usually best",
-					     " to leave criteria unspecified")
-				}
-			}
-		}
-		else if(method == "MLE")  {
-			criteria[[1]] <- FAiR_criterion_llik
-			names(criteria) <- "llik"
-		}
-		else if(method == "YWLS") {
-			criteria[[1]] <- FAiR_criterion_YWLS
-			names(criteria) <- "YWLS"
-		}
-		return(criteria)
+## impose order restrictions
+FAiR_order_FC <- 
+function(orders, level, MARGIN) {
+	rows <- nrow(orders)
+	cols <- ncol(orders)
+	the_max <- if(MARGIN == 1) cols else rows
+	text <- paste(" This matrix is consistent with ALL configurations of",
+			"factor\ncontributions at level", level, ". Edit it",
+			"to restrict the rank orderings\nof factor contributions within",
+			if(MARGIN == 1) "*rows*" else "*columns*", "using integers in",
+			"[1,", the_max, "].\n\n",
+			"Larger factor contributions correspond to smaller ranks;\n",
+			"i.e., the biggest factor contribution should be ranked 1.\n",
+			"Ranks need not be unique; i.e. if either of two factor\n",
+			"contributions could be largest, rank them both as 2.\n",
+			"When finished, press OK.")
+	invalid <- TRUE
+	if(level == 2) {
+		rownames(orders) <- paste("F", 1:nrow(orders), sep = "")
+		colnames(orders) <- paste("G", 1:ncol(orders), sep = "")
 	}
-	items <-  c(
-		paste("Reference factors at level 2 must have more effective",
-		      "variance than do the primary factors at level 1"),
-		paste("Primary factors at level 2 must have more effective",
-		      "variance than do the primary factors at level 1"),
-		paste("Reference factors at level 1 must have more effective",
-		      "variane than does the battery as a whole"),
-		paste("Primary factors at level 1 must have more effective",
-		      "variance than does the battery as a whole"),
-		"No suppressor variables at level 2",
-		"No suppressor variables at level 1",
-		paste("Reference factors at level 2 must have more generalized",
-		      "variance than do the primary factors at level 2"),
-		paste("Reference factors at level 1 must have more generalized",
-		      "variance than do the primary factors at level 1"),
-		paste("Tests in hyperplanes have more effective variance than",
-		      "does the battery as a whole"))
-	names(items) <- c("evRF_2nd", "evPF_2nd", "evRF_1st", "evPF_1st", 
-			  "no_suppressors_2nd", "no_suppressors_1st", 
-			  "dets_2nd", "dets_1st", "cohyperplanarity")
-	if( (levels == 1) | (factors[2] == 1) ) {
-		mark <- c(3, 4, 6, 8, 9)
-		items <- items[mark]
-		checked <- c(1, 0, 1, 0, 0)
-	}
-	else {
-		checked <- c(0, 0, 1, 0, 1, 1, 0, 0, 0)
-	}
-	checked <- as.logical(checked)
+	else    colnames(orders) <- paste("F", 1:ncol(orders), sep = "")
 
-	if(method == "MLE") {
-		text <-  paste( "Please indicate which, if any, lexical criteria you",
-				"would like to use.\nThe log-likelihood will",
-				"automatically be added as the last, or only, criterion.")
+	while(invalid) {
+		orders <- FAiR_edit(text, orders)
+		if(all(c(orders) %in% c(1:the_max))) break
+		message <- paste("all entries must be integers between 1 and", the_max)
+		gmessage(message)
 	}
-	else if(method == "YWLS") {
-		text <-  paste( "Please indicate which, if any, lexical criteria you",
-				"would like to use.\nThe WLS criterion in Yates (1987)",
-				"will be added as the last, or only, criterion")
+	return(orders[1:rows,1:cols,drop = FALSE])
+}
+
+## designate best variables (1st-order factors) at level 1 (2)
+FAiR_indicators_FC <-
+function(indicators, level) {
+	rows <- nrow(indicators)
+	cols <- ncol(indicators)
+	text <- paste("Change the appropriate cell of the following matrix to TRUE to",
+			"indicate\nwhich", if(level == 1) "manifest variable" else
+			"factor at level 1", "is the best indicator of a factor at level",
+			level, ".\nIf you do not wish to take such a position for some",
+			"factor,\nleave all cells in that column as FALSE. When",
+			"finished, press OK.")
+	invalid <- TRUE
+	while(invalid) {
+		indicators <- FAiR_edit(text, indicators)
+		if(all(colSums(indicators) <= 1)) break
+		message <- paste("there should be at most one TRUE per column, the rest",
+					"must be FALSE; try again.")
+		gmessage(message)
 	}
-	else stop("This should not have happened. Please notify maintainer.")
+	out <- rep(NA_integer_, ncol(indicators))
+	for(i in 1:ncol(indicators)) {
+		if(any(indicators[,i])) out[i] <- which(indicators[,i])
+		else out[i] <- NA_integer_
+	}
+	return(out)
+}
+
+## set up blocking matrix
+FAiR_blockanator <-
+function(fixed, level) {
+	rows <- nrow(fixed)
+	cols <- ncol(fixed)
+	mat  <- matrix(FALSE, nrow = nrow(fixed), ncol = ncol(fixed))
+	mat[!is.na(fixed) & as.logical(fixed)] <- TRUE
+	dimnames(mat) <- dimnames(fixed)
+	text  <- paste("Indicate which coefficients at level", level, "must *not* be",
+			"zero by changing\nthe appropriate cells to TRUE.",
+			"Press OK when finished")
+	mat <- FAiR_edit(text, mat)
+	invalid <- !is.logical(mat)
+	while(invalid) {
+		if(is.logical(mat)) break
+		gmessage("all cells must be TRUE or FALSE")
+		mat <- !(!mat)
+		dimnames(mat) <- dimnames(fixed)
+		mat <- FAiR_edit(text, mat)
+	}
+	return(mat[1:rows,1:cols,drop = FALSE])
+}
+
+## establish equality constraints among cells in a primary pattern coefficient matrix
+FAiR_equality_restrictions <- 
+function(fixed, level, auto = FALSE) {
+	out <- list()
+	if(auto) return(out)
+	count <- 1
+	while(TRUE) {
+	text <- paste(" Please change cells that must be equal to each other at level",
+			level, "to TRUE and then press OK.\n",
+			"You will have multiple opportunities to designate sets of",
+			"equal coefficients.", "This is set", count, ".\n",
+			"When finished, leave all cells as FALSE and press OK")
+		mat <- matrix(FALSE, nrow = nrow(fixed), ncol = ncol(fixed),
+				dimnames = dimnames(fixed))
+		mat <- FAiR_edit(text, mat)
+		trues <- sum(mat)
+		if(trues == 1) {
+			message <- paste("The number of cells that are TRUE must be",
+				"greater than one (to indicate equality restrictions)",
+				"or zero (to indicate you are finished imposing equality",
+				"restrictions). Try again")
+			gmessage(message)
+			next
+		}
+		else if(trues == 0) break
+		out[[count]] <- new("equality_restriction", free = which(mat)[1],
+					fixed = which(mat)[-1], dims = dim(fixed),
+					rownames = rownames(fixed), 
+					level = as.integer(level))
+		count <- count + 1
+		cat("Thank you sir, may I have another set of equality restrictions?\n")
+	}
+	return(out)
+}
+
+FAiR_inequalities <-
+function(level_1, level_2, factors, SEFA) {
+	## Level 1
+	constraints <- FAiR_constraints_1st(onecol = factors[1] == 1)
+	items <- sapply(constraints, FUN = function(x) x[[2]])
+	names(items) <- names(constraints)
+	if(!SEFA) constraints$block_1st <- NULL
+	checked <- rep(FALSE, length(items))
+	text <- paste( "Please indicate which, if any, restrictions you would like",
+			"to impose at level 1")
+
+	if(level_1) answer <- FAiR_get_answer(text, check_args = list(items = items, 
+				  		checked = checked))
+	else        answer <- as.character(NULL)
+
+	foo <- function(x) x[[1]]
+	if(length(answer)) criteria <- sapply(constraints[names(answer)], FUN = foo)
+	else               criteria <- list()
+
+	if(!level_2) return(criteria)
+
+	## Level 2
+	constraints <- FAiR_constraints_2nd(onecol = factors[2] == 1)
+	items <- sapply(constraints, FUN = function(x) x[[2]])
+	names(items) <- names(constraints)
+	if(!SEFA) constraints$block_2nd <- NULL
+	checked <- rep(FALSE, length(items))
+	text <- paste( "Please indicate which, if any, restrictions you would like",
+			"to impose at level 2")
 
 	answer <- FAiR_get_answer(text, check_args = list(items = items, 
-				  checked = checked))
-	if(length(answer) > 0) {
-		answer_names <- names(answer)
-		criteria <- list()
-		threshold <- NA_real_
-		for(i in 1:length(answer_names)) {
-			mesh <- paste("FAiR_criterion_", answer_names[i], sep = "")
-			criteria[[i]] <- get(mesh)
-			names(criteria)[[i]] <- answer_names[i]
-			if(answer_names[i] %in% c("no_suppressors_2nd", 
-						  "no_suppressors_1st")) {
-				if(is.na(threshold)) {
-					text <- paste("Select the minimum acceptable",
-						"factor contribution coefficient\nsuch",
-						"that more negative values imply a",
-						"suppressor variable.")
-					threshold <- FAiR_get_number(text, from = -1, 
-							to = 0, by = .001, value = -.01)
-				}
-				formals(criteria[[i]])$threshold <- threshold
-			}
-		}
-	}
-	else criteria <- list()
-	criteria[[length(criteria) + 1]] <- if(method == "MLE") FAiR_criterion_llik else
-                                                                FAiR_criterion_YWLS
-	names(criteria)[length(criteria)] <- if(method == "MLE") "llik" else "YWLS"
+							checked = checked))
+
+	if(length(answer)) criteria2 <- sapply(constraints[names(answer)], FUN = foo)
+	else               criteria2 <- list()
+
+	criteria <- c(criteria2, criteria)
 	return(criteria)
 }
 
-make_restrictions <- 
-function(factors, model, method, fixed, covmat, criteria = NULL) {
-	require(gWidgetsRGtk2)
-	options(guiToolkit = "RGtk2")
-	flush.console()
-	cat("Note: The GUI window may have popped up behind your other windows.\n")
-	flush.console()
-	if(missing(model))  model  <- FAiR_get_model()
-	else                model  <- match.arg(model,  eval(formals(Factanal)$model))
-
-	if(missing(method)) method <- FAiR_get_method()
-	else                method <- match.arg(method, eval(formals(Factanal)$method))
-
-	if(missing(covmat)) stop("covmat must be specified")
-	S <- FAiR_parse(covmat = covmat, robust = FALSE, seeds = 12345)$cor
-
-	if(model == "EFA") {
-		levels <- 1
-		if(missing(factors)) {
-			text <- "How many factors should be extracted?"
-			factors <- FAiR_get_number(text, from = 1, to = floor(nrow(S)/2),
-							value = 3, by = 1)
-		}
-		else stopifnot(is.numeric(factors), length(factors) <= 2,
-				factors == as.integer(factors), factors[1] > 0)
-		if(length(factors) == 1) factors <- c(factors, 0)
-		else factors[2] <- 0
-
-		p <- nrow(S)
-		dof <- as.integer(0.5 * ((p - factors[1])^2 - p - factors[1]))
-		Phi <- diag(factors[1])
-		attributes(Phi)$ev <- 1
-		Theta2 <- diag(p)
-		if(method == "MLE") {
-			algorithm <- FAiR_get_algorithm()
-			if(algorithm < 3) {
-				Domains <- cbind(0, rep(1, p))
-				rownames(Domains) <- rownames(S)
-				restrictions <- new("restrictions.factanal", 
-						factors = factors, nvars = p,
-						dof = dof, Domains = Domains,
-						model = model, method = method,
-						fast = algorithm == 1)
+## get criteria to use in SEFA and CFA models
+FAiR_criterionator_extraction <-
+function(criteria, methodArgs, discrepancy, factors, manifest) {
+	if(!is.list(criteria)) stop("'criteria' must be a list")
+	else if(length(criteria) > 0) {
+		CRITERIA <- c(FAiR_constraints_2nd(), FAiR_constraints_1st())
+		for(i in 1:length(criteria)) {
+			if(is.character(criterionname <- criteria[[i]])) {
+				criteria[[i]] <- CRITERIA[[criteria[[i]]]][[1]]
+				names(criteria)[i] <- criterionname
 			}
-			else {
-				top <- diag(factors)
-				top[lower.tri(top, diag = TRUE)] <- NA_real_
-				fixed <- rbind(top, matrix(NA_real_, nrow = p - factors, 
-								     ncol = factors) )
-				rownames(fixed) <- rownames(S)
-				Domains <- cbind(-1, rep(1, sum(is.na(fixed))))
-				Domains[1,1] <- 0
-				Domains <- rbind(Domains, cbind(0, rep(1, p)))
-				beta_list <- list(beta = fixed, free = c(is.na(fixed)),
-						num_free = sum(is.na(fixed)))
-				restrictions <- new("restrictions.orthonormal",
-						factors = factors, nvars = nrow(Domains),
-						dof = dof, Domains = Domains,
-						model = model, method = method,
-						Phi = Phi, beta = beta_list,
-						Theta2 = list(Theta2 = Theta2),
-						criteria = list(FAiR_criterion_llik))
+			else if(!is.function(criteria[[i]])) {
+				stop("criteria must be a list of character",
+					" strings or functions, it is usually best",
+					" to leave criteria unspecified")
 			}
-		}
-		else { # YWLS
-			top <- diag(factors)
-			top[lower.tri(top, diag = TRUE)] <- NA_real_
-			fixed <- rbind(top, matrix(NA_real_, nrow = p - factors, 
-							     ncol = factors) )
-			rownames(fixed) <- rownames(S)
-			Domains <- cbind(-1, rep(1, sum(is.na(fixed))))
-			Domains[1,1] <- sqrt(.Machine$double.eps)
-			Domains <- rbind(Domains, cbind(0, rep(1, nrow(S))))
-			beta_list <- list(beta = fixed, free = c(!is.na(fixed)))
-			restrictions <- new("restrictions.orthonormal",
-					factors = factors, nvars = nrow(Domains),
-					dof = dof, Domains = Domains,
-					model = model, method = method,
-					Phi = Phi, beta = beta_list,
-					Theta2 = Theta2,
-					criteria = list(FAiR_criterion_llik))
 		}
 	}
-	else { # SEFA / CFA
-		if(missing(factors)) {
-			text <- "How many factors should be extracted at level 1?"
-			factors <- FAiR_get_number(text, from = 1, to = floor(nrow(S)/2),
-							value = 2, by = 1)
-		}
-		else stopifnot(is.numeric(factors), all(factors == as.integer(factors)), 
-				factors[1] > 0)
+	if(!(discrepancy %in% c("MLE", "YWLS")) && is(manifest, "manifest.data") &&
+		is(manifest@acov, "diagonalMatrix")) discrepancy <- "DWLS"
 
-		if(factors[1] >= 3) {
-			text <- paste("Would you like to estimate a simultaneous",
-					"second-order model?")
-			second <- FAiR_yesno(text)
-			levels <- 1 + second
-
-			if(levels > 1 & (length(factors) == 1)) {
-				text <- "How many factors should be extracted at level 2?"
-				factors <- if(factors[1] < 5)  c(factors, 1) else
-						c(factors, FAiR_get_number(text, from = 1,
-						to = floor(factors/2), by = 1, value = 1))
-			}
-			else if(second && (length(factors) == 1)) factors <- c(factors, 1)
-			else if(length(factors) == 1) factors <- c(factors, 0)
+	criteria[[length(criteria) + 1]] <- FAiR_discrepancy(discrepancy)
+	if(discrepancy == "SHK") {
+		criteria2 <- try(FAiR_constantanator(manifest, "SHK", criteria))
+		if(!is.list(criteria2)) {
+			discrepancy <- "ELLIPTICAL"
+			l <- length(criteria)
+			criteria[[l]] <- FAiR_discrepancy(discrepancy)
+			criteria <- FAiR_constantanator(manifest, discrepancy, criteria)
 		}
-		else { 
-			levels <- 1
-			if(length(factors) == 1) factors <- c(factors, 0)
-		}
-
-		if(missing(fixed)) {
-			fixed <- matrix(NA_real_, nrow = nrow(S), ncol = factors[1])
-			rownames(fixed) <- rownames(S)
-			colnames(fixed) <- paste("Factor_", 1:factors[1], sep = "")
-
-			if(factors[2] > 0) {
-				fixed2 <- matrix(NA_real_, factors[1], factors[2])
-				rownames(fixed2) <- paste("1_Factor_", 1:factors[1], 
-								sep = "")
-				colnames(fixed2) <- paste("2_Factor_", 1:factors[2], 
-								sep = "")
-			}
-		}
-		else if(is.list(fixed)) {
-			if(levels == 1) {
-				stop("you passed 'fixed' as a list but specified a",
-					"single-equation model, please respecify")
-			}
-			fixed2 <- fixed[[2]]
-			fixed  <- fixed[[1]]
-
-			if(nrow(fixed) != nrow(S)) {
-				stop("'fixed[[1]]' must have as many rows as 'S'")
-			}
-			if(ncol(fixed) != factors[1]) {
-				stop("'fixed[[1]]' must have as many columns as there",
-					" are factors at level 1")
-			}
-			if(is.null(rownames(fixed))) rownames(fixed) <- rownames(S)
-
-			if(nrow(fixed2) != factors[1]) {
-				stop("'fixed[[2]]' must have as many rows as there are",
-					"factors at level 1")
-			}
-			else if(ncol(fixed2) != factors[2]) {
-				stop("'fixed[[2]]' must have as many columns as there",
-					"are factors are level 2")
-			}
-			if(is.null(rownames(fixed2))) {
-				rownames(fixed2) <- paste("1_Factor_", 1:factors[1], 
-							sep = "")
-			}
-			if(is.null(colnames(fixed2))) {
-				colnames(fixed2) <- paste("2_Factor_", 1:factors[2], 
-							sep = "")
-			}
-		}
-		else if(is.matrix(fixed)) {
-			if(nrow(fixed) != nrow(S)) {
-				stop("'fixed' must have as many rows as 'S'")
-			}
-			if(ncol(fixed) != factors[1]) {
-				stop("'fixed' must have as many columns as there are",
-					" factors at level 1")
-			}
-			if(is.null(rownames(fixed))) rownames(fixed) <- rownames(S)
-
-			if(factors[2] > 0) {
-				fixed2 <- matrix(NA_real_, factors[1], factors[2])
-				rownames(fixed2) <- paste("1_Factor_", 1:factors[1], 
-								sep = "")
-				colnames(fixed2) <- paste("2_Factor_", 1:factors[2], 
-								sep = "")
-			}
-		}
-		else {
-			stop("'fixed' must be a matrix, a list of two matrices, or ",
-				"left unspecified (recommended)")
-		}
-
-		if(levels > 1) {
-			if(factors[2] > 1) Domains <- FAiR_bounds_cormat(factors[2], 2)
-			else Domains <- matrix(NA_real_, nrow = 0, ncol = 2)
-			if(model == "SEFA") {
-				text <- paste("Would you like to peg any coefficients",
-						"to exact values at level 2?")
-				pegs <- FAiR_yesno(text, selected = 2)
-				if(pegs) fixed2 <- FAiR_peg_coefficients(fixed2, 2)
-			}
-			else if(all(is.na(fixed2))) {
-				fixed2 <- FAiR_peg_coefficients(fixed2, 2) # CFA
-			}
-
-			temp_Domains <- FAiR_bounds_coefficients(fixed2, level = 2)
-			pegged2 <- !is.na(fixed2)
-			if(any(pegged2)) temp_Domains <- temp_Domains[!c(pegged2),]
-			Delta_select <- rep(FALSE, nrow(Domains))
-			Domains <- rbind(Domains, temp_Domains)
-			Delta_select <- c(Delta_select, rep(TRUE, sum(!pegged2)))
-			Delta_list <- list(Delta = fixed2, free = c(is.na(fixed2)),
-						select = Delta_select) # added to later
-
-			if( (model == "SEFA") && (factors[2] > 1) ) {
-				fix_Delta_args <- FAiR_get_fix_coefficients_args(
-							factors = factors[2], level = 2,
-							fixed = fixed2)
-				Delta_list$fix_Delta_args <- fix_Delta_args
-			}
-		}
-		else Domains <- FAiR_bounds_cormat(factors[1], 1)
-
-		if(model == "SEFA") {
-			text <- if(levels == 1) paste("Would you like to peg any",
-						"coefficients to exact values?") else
-				paste("Would you like to peg any coefficients at level",
-					"1 to exact values?")
-			pegs <- FAiR_yesno(text, selected = 2)
-			if(pegs) fixed <- FAiR_peg_coefficients(fixed, 1)
-		}
-		else if(all(is.na(fixed))) {
-			fixed <- FAiR_peg_coefficients(fixed, 1)
-		}
-
-		temp_Domains <- FAiR_bounds_coefficients(fixed, level = 1)
-		pegged <- !is.na(fixed)
-		if(any(pegged)) temp_Domains <- temp_Domains[!c(pegged),]
-		beta_select <- rep(FALSE, nrow(Domains))
-		Domains <- rbind(Domains, temp_Domains)
-		beta_select <- c(beta_select,   rep(TRUE, sum(!pegged)), 
-						rep(FALSE, nrow(S)))
-		if(model == "SEFA") {
-			fix_beta_args <- FAiR_get_fix_coefficients_args(factors[1], 1, fixed)
-			indeterminate <- FAiR_indeterminator("SEFA", factors,
-							zeros1 = fix_beta_args$zeros,
-							zeros2 = if(levels == 1) 0 else 
-								 if(factors[2] == 1) 0 else
-								fix_Delta_args$zeros,
-							nonzeros1 = sum(fixed  != 0, na.rm = TRUE),
-							nonzeros2 = sum(fixed2 != 0, na.rm = TRUE))
-			dof <- 0.5 * nrow(S) * (nrow(S) + 1) - nrow(Domains) - nrow(S) + 
-				sum(fix_beta_args$zeros) - sum(fixed == 0, na.rm = TRUE) +
-				sum(Domains[,1] == Domains[,2])
-			if(!is.na(fix_beta_args$row_complexity[1])) {
-				dof <- dof - sum(fix_beta_args$zeros)
-				if(length(fix_beta_args$row_complexity) == 1) {
-					dof <- dof + nrow(S) * (factors[1] - 
-								fix_beta_args$row_complexity)
-				}
-				else dof <- dof + sum(factors[1] - fix_beta_args$row_complexity)
-					
-			}
-			if(levels > 0) {
-				if(factors[2] > 1) {
-					dof <- dof + sum(fix_Delta_args$zeros) - 
-						     sum(fixed2 == 0, na.rm = TRUE)
-					if(!is.na(fix_Delta_args$row_complexity[1])) {
-						dof <- dof - sum(fix_Delta_args$zeros)
-						if(length(fix_Delta_args$row_complexity) == 1) {
-							dof <- dof + factors[1] * (factors[2] - 
-								   fix_Delta_args$row_complexity)
-						}
-						else dof <- dof + sum(factors[2] - 
-								   fix_Delta_args$row_complexity)
-					}
-				}
-			}
-			beta_list <- list(beta = fixed, free = c(!pegged), 
-					select = beta_select, 
-					fix_beta_args = fix_beta_args)
-		}
-		else { # CFA
-			indeterminate <- FAiR_indeterminator("CFA", factors,
-							zeros1 = sum(fixed == 0, na.rm = TRUE),
-							zeros2 = sum(fixed2 == 0, na.rm = TRUE),
-							nonzeros1 = sum(fixed != 0, na.rm = TRUE),
-							nonzeros2 = sum(fixed2 != 0, na.rm = TRUE))
-			if(indeterminate == "determined") {
-				temp_fixed <- fixed
-				temp_fixed[is.na(temp_fixed)] <- runif(sum(is.na(temp_fixed)), 
-									max = 0.5)
-				check1 <- FAiR_check_coefficients(temp_fixed)
-				if(check1 != 1) indeterminate <- "Howe1"
-				else if(levels > 1) {
-					temp_fixed <- fixed2
-					temp_fixed[is.na(temp_fixed)] <- runif(sum(is.na(temp_fixed)),
-										max = 0.5)
-					check2 <- FAiR_check_coefficients(temp_fixed)
-					if(check2 != 1) indeterminate <- "Howe2"
-				}
-			}
-			dof <- 0.5 * nrow(S) * (nrow(S) + 1) - nrow(Domains) - nrow(S)
-			beta_list <- list(beta = fixed, free = c(!pegged), 
-					select = beta_select)
-		}
-
-		dof <- as.integer(dof)
-		if(dof < 0) {
-			stop("negative degrees of freedom", 
-			     "estimate fewer factors or impose more restrictions")
-		}
-
-		if(indeterminate != "determined") {
-			if(indeterminate == "minimal") {
-				text <- paste("It appears that the restrictions only minimally",
-						"satisfy the theorem in Howe (1955) on rotational",
-						"indeterminacy.\n A SEFA model can be estimated in",
-						"this case, but it is not clear that the mode of the",
-						"objective function is unique.\n It is recommended",
-						"to press 'Cancel' and impose at least one more",
-						"restriction on the model.\n Or you can press 'OK'",
-						"to continue if you are sure the mapping rule",
-						"or bounds bind.")
-			}
-			else if(indeterminate == "Howe1") {
-				text <- paste("It appears that the restrictions do not satisfy the",
-						"rank condition in Howe (1955) on rotational",
-						"indeterminacy at level 1.\n It is recommended to",
-						"'Cancel' and rectify this situation but you can",
-						"press 'OK' to continue if you are sure that",
-						"rotational indeterminacy is eliminated.")
-				warning("It appears the rank condition is not satisfied at level 1.")
-			}
-			else if(indeterminate == "Howe2") {
-				text <- paste("It appears that the restrictions do not satisfy the",
-						"rank condition in Howe (1955) on rotational",
-						"indeterminacy at level 2.\n It is recommended to",
-						"'Cancel' and rectify this situation but you can",
-						"press 'OK' to continue if you are sure that",
-						"rotational indeterminacy is eliminated.")
-				warning("It appears the rank condition is not satisfied at level 2.")
-			}
-			else {
-				text <- paste("There appear to be too few restrictions",
-						"to eliminate rotational indeterminacy",
-						"according\nto the theorem in Howe (1955).",
-						"Click OK to continue anyway or press Cancel.")
-				warning("There appear to be too few restrictions to",
-					" eliminate rotational indeterminacy.")
-			}
-			stopifnot(gbasicdialog(widget = glabel(text)))
-		}
-		criteria  <- FAiR_criterionator_extraction(levels, factors, 
-                                                           method, criteria)
-		Theta2_select <- rep(FALSE, nrow(Domains))
-		Domains <- rbind(Domains, cbind(0, rep(1, nrow(S))))
-		Theta2_select <- c(Theta2_select, rep(TRUE, nrow(S)))
-		Theta2_list <- list(Theta2 = diag(nrow(S)), diagonal = TRUE,
-					select = Theta2_select)
-		diag(Theta2_list$Theta2) <- NA_real_
-		colnames(Domains) <- c("lower", "upper")
-		if(levels == 1) {
-			restrictions <- new("restrictions.1storder",
-						factors = factors, nvars = nrow(Domains),
-						dof = dof, Domains = Domains,
-						model = model, method = method,
-						Phi = diag(rep(0.5, factors[1])),
-						beta = beta_list, Theta2 = Theta2_list,
-						criteria = criteria)
-		}
-		else if(factors[2] == 1) {
-			Delta_list$select <- NULL
-			Delta_list$num_free <- sum(Delta_list$free)
-			restrictions <- new("restrictions.general",
-						factors = factors, nvars = nrow(Domains),
-						dof = dof, Domains = Domains,
-						model = model, method = method,
-						Phi = diag(rep(0, factors[1])),
-						Delta = Delta_list,
-						beta = beta_list, Theta2 = Theta2_list,
-						criteria = criteria)
-		}
-		else {
-			# need to pad Delta_list$select with FALSE
-			Delta_list$select <- c(Delta_list$select, rep(FALSE, 
-					       nrow(Domains) - length(Delta_list$select)))
-			restrictions <- new("restrictions.2ndorder",
-						factors = factors, nvars = nrow(Domains),
-						dof = dof, Domains = Domains,
-						model = model, method = method,
-						Xi = diag(rep(0.5, factors[2])),
-						Delta = Delta_list,
-						Phi = diag(rep(0, factors[1])),
-						beta = beta_list, Theta2 = Theta2_list,
-						criteria = criteria)
-		}
+		else criteria <- criteria2
 	}
-	return(restrictions)
+	else criteria <- FAiR_constantanator(manifest, discrepancy, criteria)
+	names(criteria)[length(criteria)] <- discrepancy
+	criteria <- FAiR_fill_methodArgs_extraction(criteria, factors, manifest,
+							methodArgs)
+	return(criteria)
 }
 
-make_criteria <-
-function(factors, weights, FAobject) {
-	require(gWidgetsRGtk2)
-	options(guiToolkit = "RGtk2")
-	cat("Note: The GUI window may have popped up behind your other windows.\n")
-	flush.console()
+## this does the first menu that pops up
+# FAiR_menunator <-
+# function(factors, auto) {
+# 	if(factors[2] >= 2) {
+# 		items2 <- c(paste("Change bounds on correlations among primary factors",
+# 				  "at level 2 (currently [-1,1] for each)"), 
+# 				paste("Change bounds on coefficients at level 2",
+# 				"(currently [-1.5,1.5] for each)"),
+# 				"Impose functional inequality restrictions at level 2")
+# 		names(items2) <- c("2nd_bounds_cormat", "2nd_bounds_coef",
+# 					"2nd_inequalities")
+# 		items_list <- list()
+# 	}
+# 	else if(factors[2] == 1) {
+# 		items2 <- c(paste("Change bounds on coefficients at level 2",
+# 				"(currently [-1.0,1.0] for each)"),
+# 				"Impose functional inequality restrictions at level 2")
+# 		names(items2) <- c("2nd_bounds_coef", "2nd_inequalities")
+# 		items_list <- list()
+# 	}
+# 	else { # one-level model
+# 		items2 <- paste("Change bounds on correlations among primary factors at",
+# 				"level 1 (currently [-1,1] for each)")
+# 		items_list <- list(TRUE)
+# 		names(items_list[[1]]) <- names(items2) <- "1st_bounds_cormat"
+# 	}
+# 
+# 	bound <- ifelse(factors[1] > 1, 1.5, 1.0)
+# 	items1 <- c(paste("Change bounds on coefficients at level 1",
+# 				"(currently [", -bound, ",", bound, "] for each)"),
+# 				"Impose functional inequality restrictions at level 1")
+# 	names(items1) <- c("1st_bounds_coef", "1st_inequalities")
+# 
+# 	items <- c(items2, items1)
+# 	if(factors[2] == 0) {
+# 		items_list[[1]] <- c(items_list[[1]], rep(TRUE, length(items1)))
+# 		names(items_list[[1]]) <- c(names(items_list[[1]][1]), names(items1))
+# 	}
+# 	else {
+# 		items_list <- list(rep(TRUE, length(items1)), rep(TRUE, length(items2)))
+# 		names(items_list[[1]]) <- names(items1)
+# 		names(items_list[[2]]) <- names(items2)
+# 	}
+# 
+# 	if(auto) return(items_list)
+# 	text <- paste("Would you like to impose inequality restrictions on the model?\n",
+# 		"Anything you specified at the command prompt will be implemented",
+# 		"automatically,\nbut you can mark the appropriate boxes to verify it")
+# 	checked <- rep(FALSE, length(items))
+# 	names(checked) <- names(items)
+# 	check_args <- list(items = items, checked = checked)
+# 	answer <- FAiR_get_answer(text, check_args = check_args)
+# 	if(any(names(answer) %in% names(items1))) {
+# 		temp <- intersect(names(answer), names(items1))
+# 		items_list[[1]][temp] <- FALSE
+# 	}
+# 	if(factors[2] > 0 && any(names(answer) %in% names(items2))) {
+# 		temp <- intersect(names(answer), names(items2))
+# 		items_list[[2]][temp] <- FALSE
+# 	}
+# 	else if(factors[2] == 0 && "1st_bounds_cormat" %in% names(answer)) {
+# 		items_list[[1]]["1st_bounds_cormat"] <- FALSE
+# 	}
+# 	return(items_list)
+# }
 
-	criteria <- list()
+## this does the first menu that pops up
+FAiR_menunator <-
+function(factors, SEFA) {
+	if(factors[2] >= 2) {
+		items2 <- c(paste("Change bounds on correlations among primary factors",
+				  "at level 2 (currently [-1,1] for each)"), 
+			paste("Fix specific coefficients at level 2 to particular values",
+				"(or designate them unfree for other reasons)"),
+			paste("Change bounds on coefficients at level 2",
+				"(currently [-1.5,1.5] for each)"),
+			"Constrain coefficients at level 2 to be equal to each other",
+			"Use a nondefault mapping rule at level 2",
+			paste("Change the number of zero coefficients required",
+			"for each factor at level 2 (currently", factors[2], "for each)"),
+			"Impose functional inequality restrictions at level 2")
+		names(items2) <- c("bounds_cormat", "peg_coef",
+				"bounds_coef", "equalities",
+				 "mapping_rule", "zeros", "inequalities")
+		if(!SEFA) items2 <- items2[c("bounds_cormat", "equalities",
+						"bounds_coef", "inequalities")]
+		items_list <- list()
+	}
+	else if(factors[2] == 1) {
+		items2 <- c(paste("Fix specific coefficients at level 2 to particular",
+				"values (or designate them unfree for other reasons)"),
+			paste("Change bounds on coefficients at level 2",
+				"(currently [-1.0,1.0] for each)"),
+			"Constrain coefficients at level 2 to be equal to each other",
+			"Impose functional inequality restrictions at level 2")
+		names(items2) <- c("peg_coef", "bounds_coef",
+				"equalities", "inequalities")
+		items_list <- list()
+	}
+	else { # one-level model
+		items2 <- paste("Change bounds on correlations among primary factors at",
+				"level 1 (currently [-1,1] for each)")
+		items_list <- list(FALSE)
+		names(items_list[[1]]) <- names(items2) <- "bounds_cormat"
+	}
 
-	# No factor collapse criterion
-	text <- paste("Select the minimum acceptable effective variance for the",
-			"correlation matrix among factors.\nSetting this threshold",
-			"too close to zero risks factor collapse.")
-	threshold     <- FAiR_get_number(text, from = 0, to = .9, by = .01, value = .25)
-	criteria[[1]] <- FAiR_criterion_no_factor_collapse
-	formals(criteria[[1]])$threshold <- threshold
+	bound <- ifelse(factors[1] > 1, 1.5, 1.0)
+	SEFA2 <- SEFA && factors[1] > 1
+	items1 <- c(paste("Fix specific coefficients at level 1 to particular values",
+				"(or designate them unfree for other reasons)"),
+			paste("Change bounds on coefficients at level 1",
+				"(currently [", -bound, ",", bound, "] for each)"),
+			"Constrain coefficients at level 1 to be equal to each other",
+			"Use a nondefault mapping rule at level 1",
+			paste("Change the number of zero coefficients required",
+			"for each factor at level 1 (currently", factors[1], "for each)"),
+			"Impose functional inequality restrictions at level 1")
+	names(items1) <- c("peg_coef", "bounds_coef", "equalities",
+			"mapping_rule", "zeros", "inequalities")
+	if(!SEFA) items1 <- items1[c("bounds_coef", "equalities", "inequalities")]
 
-	# Other restriction criteria
-	items <- c("Limit primary factor correlations", 
-		paste("Reference factors must have more effective",
-		      "variance than does the battery as a whole"),
-		paste("Primary factors must have more effective",
-		      "variance than does the battery as a whole"),
-		"No suppressor variables", 
-		paste("Reference factors must have more generalized",
-		      "variance than do the primary factors"),
-		"Positive manifold")
-	names(items) <- paste("FAiR_criterion_", c("limit_correlations", "ev_RF", "ev_PF",
-			      "dets_1st", "no_suppressors", "positive_manifold"), sep = "")
-				
-	text <-  paste( "Please indicate which, if any, additional lexical criteria you",
-			"would like to use.\nYou will have an opportunity to select",
-			"the ultimate criterion momentarily")
-	answer <- FAiR_get_answer(text, check_args = list(items = items, 
-					checked = c(FALSE, FALSE, TRUE, FALSE)))
-	if(length(answer) > 0) {
-		answer_names <- names(answer)
-		if(names(items)[1] %in% answer_names) { # limit inter-factor correlations
-			criteria[[length(criteria)+1]] <- get(names(items)[1])
+	items <- c(items2, items1)
+	if(factors[2] == 0) { 
+		items_list[[1]] <- c(items_list[[1]], rep(FALSE, length(items1)))
+		names(items_list[[1]]) <- c(names(items_list[[1]][1]), names(items1))
+	}
+	else {
+		items_list <- list(rep(FALSE, length(items1)), rep(FALSE, length(items2)))
+		names(items_list[[1]]) <- names(items1)
+		names(items_list[[2]]) <- names(items2)
+	}
 
-			# set lower bound
-			text  <- paste("Select the minimum acceptable correlation",
-					"among primary factors")
-			lower <- FAiR_get_number(text, from = -1, to = 1, 
-						 by = .01, value = -1)
-			formals(criteria[[length(criteria)]])$lower <- lower
+	text <- paste("Would you like to change the restrictions imposed on the model?\n",
+		"Anything you specified at the command prompt will be implemented",
+		"automatically,\nbut you can mark the appropriate boxes to verify")
+	checked <- rep(FALSE, length(items))
+	check_args <- list(items = items, checked = checked)
+	answer <- FAiR_get_answer(text, check_args = check_args)
+	if(any(answer %in% items1)) {
+		temp <- names(items1)[items1 %in% answer]
+		items_list[[1]][temp] <- TRUE
+	}
+	if(factors[2] > 0 &&  any(answer %in% items2)) {
+		temp <- names(items2)[items2 %in% answer]
+		items_list[[2]][temp] <- TRUE
+	}
+	else if(factors[2] == 0 && "bounds_cormat" %in% names(answer)) {
+		items_list[[1]]["bounds_cormat"] <- TRUE
+	}
+	return(items_list)
+}
 
-			# set upper bound
-			text  <- paste("Select the maximum acceptable correlation",
-					"among primary factors")
-			upper <- FAiR_get_number(text, from = lower, to = 1, 
-						  by = .01, value = 1)
-			formals(criteria[[length(criteria)]])$upper <- upper
+FAiR_GPAnator <-
+function(Lambda, method = NULL, methodArgs) {
 
-			if(lower == 0 && upper == 0) {
-				warning("Rotate() does not do orthogonal rotation.",
-					"Ignoring bounds on inter-factor correlations.")
-			}
+	items <- c("geomin", "quartimin", "target", "partially-specified target", 
+			"oblimax", "simplimax", "factor simplicity (Bentler)",
+			"Crawford-Ferguson", "infomax", "entropy (McCammon)", "oblimin")
+	names(items) <- c("geomin", "quartimin", "target", "pst", "oblimax",
+			"simplimax", "bentler", "cf", "infomax", "mccammon", "oblimin")
+	text <- "Which oblique criterion would you like to use?"
+	if(is.null(method) | method == "GPA") {
+		answer <- FAiR_get_answer(text, radio_items = items)
+		method <- names(items)[answer == items]
+	}
+	else method <- match.arg(method, names(items))
+
+	if(is.null(matrix <- methodArgs$matrix)) {
+		text <- "Which matrix should be used for the optimization?"
+		items <- c("Primary Pattern", "Reference Structure", 
+				"Factor Contribution")
+		names(items) <- c("PP", "RS", "FC")
+		answer <- FAiR_get_answer(text, radio_items = items)
+		matrix <- names(items)[items == answer]
+	}
+	else {
+		matrix <- match.arg(matrix, c("PP", "RS", "FC"))
+		methodArgs$matrix <- NULL
+	}
+
+	if(method == "geomin") {
+		if(is.null(methodArgs$delta)) {
+			text <- paste("What small constant would you like to use for the",
+				"geomin criterion?", if(ncol(Lambda) > 3)
+				"\nThe default of 0.01 might be too small")
+			methodArgs$delta <- FAiR_get_number(text, from = 0, to = 0.1,
+								by = .005, value = .01)
 		}
-		if(names(items)[2] %in% answer_names) { # ev_RF
-			criteria[[length(criteria)+1]] <- FAiR_criterion_dets
-			C <- fitted(FAobject) + diag(FAobject@uniquenesses)
-			formals(criteria[[length(criteria)]])$threshold <- det(C)^(1/ncol(C))				
+	}
+	else if(method == "target") {
+		if(is.null(methodArgs$Target)) {
+			methodArgs$Target <- FAiR_make_target(Lambda)
 		}
-		if(names(items)[3] %in% answer_names) { # ev_PF
-			criteria[[length(criteria)+1]] <- FAiR_criterion_dets
-			C <- fitted(FAobject) + diag(FAobject@uniquenesses)
-			formals(criteria[[length(criteria)]])$threshold <- det(C)^(1/ncol(C))
+		else valid <- FAiR_check_target(Lambda, methodArgs$Target)
+		methodArgs <- list(Target = methodArgs$Target)
+	}
+	else if(method == "pst") {
+		if(is.null(methodArgs$Target)) {
+			methodArgs$Target <- FAiR_make_pst(Lambda)
 		}
-		if(names(items)[4] %in% answer_names) { # no suppressors
-			criteria[[length(criteria)+1]] <- FAiR_criterion_no_suppressors
-			text <- paste("Select the minimum acceptable factor contribution",
-				"coefficient\nsuch that lower values indicate a",
-				"suppressor variable.")
-			threshold <- FAiR_get_number(text, from = -1, to = 0,
-					by = .001, value = -.01)
-			formals(criteria[[length(criteria)]])$threshold <- threshold
+		else valid <- FAiR_check_pst(Lambda, methodArgs$Target)
+
+		if(!is.null(methodArgs$W)) {
+			W <- methodArgs$W
+			methodArgs$Target[W == 0] <- NA_real_
+			warning("an unnecessary 'W' matrix was passed and some cells of",
+				" the target matrix were converted to NA")
 		}
-		if(names(items)[5] %in% answer_names) { # dets
-			criteria[[length(criteria)+1]] <- FAiR_criterion_dets
+		methodArgs <- list(Target = methodArgs$Target)
+	}
+	else if(method == "simplimax") {
+		if(is.null(methodArgs$k)) {
+			text <- paste("How many near zeros would you like the simplimax",
+					"criterion to seek?")
+			rows <- nrow(Lambda)
+			methodArgs$k <- FAiR_get_number(text, from = 1, value = rows,
+							to = length(Lambda), by = 1) 
 		}
-		if(names(items)[6] %in% answer_names) { # positive manifold
-			criteria[[length(criteria)+1]] <- FAiR_criterion_positive_manifold
-			text <- paste("Select the minimum acceptable reference structure",
-					"correlation.\nA slightly negative number is",
-					"recommended rather than zero")
-			threshold <- FAiR_get_number(text, from = -1, to = 0, 
-							by = .01, value = -.1)
-			formals(criteria[[length(criteria)]])$threshold <- threshold
+		else if(methodArgs$k < 0) {
+			stop("'k' must be positive")
+		}
+		else if(methodArgs$k > length(Lambda)) {
+			stop("'k' must be smaller than the total number of loadings")
+		}
+		methodArgs <- list(k = methodArgs$k)
+	}
+	else if(method == "cf") {
+		if(is.null(methodArgs$kappa)) {
+			text <- paste("What parameter would you like to use for the",
+					"Crawford-Ferguson criterion?")
+			methodArgs$kappa <- FAiR_get_number(text, from = 0, to = 1, 
+								by = .01, value = 0)
+		}
+		else if(methodArgs$kappa < 0) {
+			stop("'kappa' must be non-negative")
+		}
+		else if(methodArgs$kappa > 1) {
+			stop("'kappa' must be less than or equal to 1.0")
+		}
+		methodArgs <- list(kappa = methodArgs$kappa)
+	}
+	else if(method == "oblimin") {
+		if(is.null(methodArgs$gam)) {
+			text <- paste("What parameter you would like to use for the",
+					"oblimin criterion?")
+			methodArgs$gam <- FAiR_get_number(text, from = 0, to = 1, 
+								by = .01, value = 0)
+		}
+		else if(methodArgs$gam < 0) {
+			stop("'gam' must be non-negative")
+		}
+		else if(methodArgs$gam > 1) {
+			stop("'gam' must be less than or equal to 1.0")
+		}
+		methodArgs <- list(gam = methodArgs$gam)
+	}
+
+	criterion <- FAiR_analytic("GPA")[[1]]
+	formals(criterion)$matrix <- matrix
+	formals(criterion)$method <- method
+	formals(criterion)$methodArgs <- methodArgs
+	return (criterion)
+}
+
+## make a target matrix
+FAiR_make_target <-
+function(Lambda) {
+	target <- matrix(0, nrow = nrow(Lambda), ncol = ncol(Lambda))
+	rownames(target) <- rownames(Lambda)
+	colnames(target) <- colnames(Lambda)
+	text <- paste("Please edit this matrix to specify the *target* values.\n",
+			"Press OK when finished")
+	target <- FAiR_edit(text, target)
+	while(any(is.na(target))) {
+		message <- paste("Target must be *fully* specified, without any NAs",
+				"Please try again")
+		gmessage(message)
+		target <- FAiR_edit(text, target)
+	}
+	return(target[1:nrow(Lambda),1:ncol(Lambda),drop = FALSE])
+}
+
+## make a partially-specified target matrix
+FAiR_make_pst <-
+function(Lambda) {
+	target <- matrix(NA_real_, nrow = nrow(Lambda), ncol = ncol(Lambda))
+	rownames(target) <- rownames(Lambda)
+	colnames(target) <- colnames(Lambda)
+	text <- paste("Please edit this matrix to specify the *target* values.\n",
+			"Leave any untargeted cells as NA.\n",
+			"Press OK when finished")
+	target <- FAiR_edit(text, target)
+	return(target[1:nrow(Lambda),1:ncol(Lambda),drop = FALSE])
+}
+
+## fills in methodArgs for make_restrictions, possibly with GUI
+FAiR_fill_methodArgs_extraction <-
+function(criteria, factors, manifest, methodArgs) { 
+	fixed  <- matrix(NA_real_, nrow = nrow(cormat(manifest)), ncol = factors[1])
+	fixed2 <- matrix(NA_real_, nrow = factors[1], ncol = factors[2])
+
+	if(length(mark <- which(names(criteria) == "ranks_rows_1st"))) {
+		if(is.null(row_ranks <- methodArgs$row_ranks_1st) &&
+		   is.null(row_ranks <- methodArgs$row_ranks)) {
+			orders <- matrix(factors[1], nrow(fixed), factors[1])
+			rownames(orders) <- rownames(fixed)
+			colnames(orders) <- colnames(fixed)
+			row_ranks <- FAiR_order_FC(orders, level = 1, MARGIN = 1)
+		}
+# 		else methodArgs$row_ranks <- NULL
+
+		if(!identical(dim(row_ranks), dim(fixed))) {
+			stop("'row_ranks' must have the same dimension",
+				"as the loadings matrix at level 1")
+		}
+
+		vals <- unique(c(row_ranks))
+		if(any(! (vals %in% c(1:factors[1])))) {
+			stop("'row_ranks' must only contain positive integers up to ",
+				factors[1])
+		}
+
+		if(all(row_ranks == factors[1])) {
+			criteria <- criteria[-mark]
+			warning("row ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- row_ranks
+			formals(criteria[[mark]])$MARGIN <- 1
 		}
 	}
 
-	# Ultimate criterion
-	text   <- paste("Please indicate which analytic criterion should be the ultimate",
-			"criterion during the lexical minimization.")
-	items  <- c(paste("minimaximin: The maximum of the minimum squared reference",
-			"structure correlations for each outcome."), paste("phi:", 
-			"the criterion proposed by Thurstone"), paste("varphi:",
-			"a generalization of phi using weighted sums"),
-			"LS: Loading Simplicity Index proposed by Lorenzo-Seva")
-	names(items) <- c("minimaximin", "phi", "varphi", "LS")
-	answer <- FAiR_get_answer(text, radio_items = items, select = 3)
-	if(answer == items["phi"]) {
-		criteria[[length(criteria)+1]] <- FAiR_criterion_phi
+	if(length(mark <- which(names(criteria) == "ranks_rows_2nd"))) {
+		if(is.null(row_ranks <- methodArgs$row_ranks_2nd) &&
+		   is.null(row_ranks <- methodArgs$row_ranks)) {
+			orders <- matrix(factors[2], factors[1], factors[2])
+			rownames(orders) <- rownames(fixed2)
+			colnames(orders) <- colnames(fixed2)
+			row_ranks <- FAiR_order_FC(orders, level = 2, MARGIN = 1)
+		}
+# 		else methodArgs$row_ranks <- NULL
+
+		if(!identical(dim(row_ranks), dim(fixed2))) {
+			stop("'row_ranks' must have the same dimension",
+				"as the loadings matrix at level 2")
+		}
+
+		vals <- unique(c(row_ranks))
+		if(any(! (vals %in% c(1:factors[2])))) {
+			stop("'row_ranks' must only contain positive integers up to ",
+				factors[1])
+		}
+
+		if(all(row_ranks == factors[1])) {
+			criteria <- criteria[-mark]
+			warning("row ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- row_ranks
+			formals(criteria[[mark]])$MARGIN <- 1
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "ranks_cols_1st"))) {
+		if(is.null(col_ranks <- methodArgs$col_ranks_1st) &&
+		   is.null(col_ranks <- methodArgs$col_ranks)) {
+			orders <- matrix(nrow(fixed), nrow(fixed), factors[1])
+			rownames(orders) <- rownames(fixed)
+			colnames(orders) <- colnames(fixed)
+			col_ranks <- FAiR_order_FC(orders, level = 1, MARGIN = 2)
+		}
+# 		else methodArgs$col_ranks <- NULL
+
+		if(!identical(dim(col_ranks), dim(fixed))) {
+			stop("'col_ranks' must have the same dimension",
+				"as the loadings matrix at level 1")
+		}
+		vals <- unique(c(col_ranks))
+		if(any(! (vals %in% c(1:nrow(fixed))))) {
+			stop("'col_ranks' must only contain positive integers up to ",
+				nrow(fixed))
+		}
+
+		if(all(col_ranks == nrow(fixed))) {
+			criteria <- criteria[-mark]
+			warning("column ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- col_ranks
+			formals(criteria[[mark]])$MARGIN <- 2
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "ranks_cols_2nd"))) {
+		if(is.null(col_ranks <- methodArgs$col_ranks_2nd) &&
+		   is.null(col_ranks <- methodArgs$col_ranks)) {
+			orders <- matrix(nrow(fixed2), nrow(fixed2), factors[2])
+			rownames(orders) <- rownames(fixed2)
+			colnames(orders) <- colnames(fixed2)
+			col_ranks <- FAiR_order_FC(orders, level = 2, MARGIN = 2)
+		}
+# 		else methodArgs$col_ranks <- NULL
+
+		if(!identical(dim(col_ranks), dim(fixed2))) {
+			stop("'col_ranks' must have the same dimension",
+				"as the loadings matrix at level 2")
+		}
+		vals <- unique(c(col_ranks))
+		if(any(! (vals %in% c(1:nrow(fixed2))))) {
+			stop("'col_ranks' must only contain positive integers up to ",
+				nrow(fixed2))
+		}
+
+		if(all(col_ranks == nrow(fixed2))) {
+			criteria <- criteria[-mark]
+			warning("column ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- col_ranks
+			formals(criteria[[mark]])$MARGIN <- 2
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "indicators_1st"))) {
+		if(is.null(indicators <- methodArgs$indicators_1st) &&
+		   is.null(indicators <- methodArgs$indicators)) {
+			indicators <- matrix(FALSE, nrow(fixed), ncol(fixed))
+			dimnames(indicators) <- dimnames(fixed)
+			indicators <- FAiR_indicators_FC(indicators, level = 1)
+		}
+
+		if(any(!(indicators %in% c(1:nrow(fixed), NA)))) {
+			stop("all entries in 'indicators' must be NA or positive",
+				" integers less than ", nrow(fixed))
+		}
+		formals(criteria[[mark]])$indicators <- indicators
+	}
+
+	if(length(mark <- which(names(criteria) == "indicators_2nd"))) {
+		if(is.null(indicators <- methodArgs$indicators_2nd) &&
+		   is.null(indicators <- methodArgs$indicators)) {
+			indicators <- matrix(FALSE, nrow(fixed2), ncol(fixed2))
+			dimnames(indicators) <- dimnames(fixed2)
+			indicators <- FAiR_indicators_FC(indicators, level = 2)
+		}
+
+		if(any(!(indicators %in% c(1:nrow(fixed2), NA)))) {
+			stop("all entries in 'indicators' must be NA or positive",
+				" integers less than ", nrow(fixed2))
+		}
+		formals(criteria[[mark]])$indicators_2nd <- indicators
+	}
+
+	if(length(mark <- which(names(criteria) == "no_neg_suppressors_1st"))) {
+		text <- paste("Select the minimum acceptable factor contribution",
+			"coefficient\nsuch that lower values indicate a",
+			"suppressor variable at level 1.")
+		if(is.null(FC_threshold <- methodArgs$FC_threshold_1st) &&
+		   is.null(FC_threshold <- methodArgs$FC_threshold)) {
+			FC_threshold <- FAiR_get_number(text, from = -1, to = 0,
+							by = .001, value = -.01)
+		}
+# 		else methodArgs$FC_threshold <- NULL
+
+		if(FC_threshold <= -1) stop("'FC_threshold' must be > -1")
+		if(FC_threshold > 0)   stop("'FC_threshold' must be < 0")
+		formals(criteria[[mark]])$FC_threshold <- FC_threshold
+	}
+
+	if(length(mark <- which(names(criteria) == "no_neg_suppressors_2nd"))) {
+		text <- paste("Select the minimum acceptable factor contribution",
+			"coefficient\nsuch that lower values indicate a",
+			"suppressor variable at level 2.")
+		if(is.null(FC_threshold <- methodArgs$FC_threshold_2nd) &&
+		   is.null(FC_threshold <- methodArgs$FC_threshold)) {
+			FC_threshold <- FAiR_get_number(text, from = -1, to = 0,
+							by = .001, value = -.01)
+		}
+# 		else methodArgs$FC_threshold <- NULL
+
+		if(FC_threshold <= -1) stop("'FC_threshold' must be > -1")
+		if(FC_threshold > 0)   stop("'FC_threshold' must be < 0")
+		formals(criteria[[mark]])$FC_threshold_2nd <- FC_threshold
+	}
+
+	if(length(mark <- which(names(criteria) == "dist_cols_1st"))) {
+		text <- paste("Select the minimum acceptable binary distance between",
+				"columns of the logically negated loadings matrix",
+				"at level 1.")
+		if(is.null(cutpoint <- methodArgs$cutpoint_1st) &&
+		   is.null(cutpoint <- methodArgs$cutpoint)) {
+			cutpoint <- FAiR_get_number(text, from = 0, to = 1,
+							by = .01, value = 0.5)
+		}
+
+		if(cutpoint <= 0) stop("'cutpoint' must be > 0")
+		if(cutpoint >  1) stop("'cutpoint' must be <= 1")
+		formals(criteria[[mark]])$cutpoint <- cutpoint
+	}
+
+	if(length(mark <- which(names(criteria) == "dist_cols_2nd"))) {
+		text <- paste("Select the minimum acceptable binary distance between",
+				"columns of the logically negated loadings matrix",
+				"at level 2.")
+		if(is.null(cutpoint <- methodArgs$cutpoint_2nd) &&
+		   is.null(cutpoint <- methodArgs$cutpoint)) {
+			cutpoint <- FAiR_get_number(text, from = 0, to = 1,
+							by = .01, value = 0.5)
+		}
+
+		if(cutpoint <= 0) stop("'cutpoint' must be > 0")
+		if(cutpoint >  1) stop("'cutpoint' must be <= 1")
+		formals(criteria[[mark]])$cutpoint_2nd <- cutpoint
+	}
+
+	if(length(mark <- which(names(criteria) == "volume_1st"))) {
+		S <- cormat(manifest)
+		formals(criteria[[mark]])$det_S <- det(S)
+	}
+
+	if(length(mark <- which(names(criteria) == "block_2nd"))) {
+		if(is.null(blockers <- methodArgs$blockers_2nd) &&
+		   is.null(blockers <- methodArgs$blockers)) {
+			blockers <- FAiR_blockanator(fixed2, level = 2)
+		}
+
+		if(!identical(dim(blockers), dim(fixed2))) {
+			stop("the dimensions of blockers must be the same as the ",
+				"loading matrix at level 1")
+		}
+		if(!is.logical(blockers)) {
+			stop("all cells of 'blockers' must be 'NA', 'TRUE', or 'FALSE'")
+		}
+		if(!any(blockers, na.rm = TRUE)) {
+			criteria <- criteria[-mark]
+			warning("blockers constraint omitted at level 2 because no ",
+				"coefficients were blocked")
+		}
+		else formals(criteria[[mark]])$blockers_2nd <- blockers
+	}
+
+	if(length(mark <- which(names(criteria) == "block_1st"))) {
+		if(is.null(blockers <- methodArgs$blockers_1st) &&
+		   is.null(blockers <- methodArgs$blockers)) {
+			blockers <- FAiR_blockanator(fixed, level = 1)
+		}
+
+		if(!identical(dim(blockers), dim(fixed))) {
+			stop("the dimensions of blockers must be the same as the ",
+				"loading matrix at level 1")
+		}
+		if(!is.logical(blockers)) {
+			stop("all cells of 'blockers' must be 'NA', 'TRUE', or 'FALSE'")
+		}
+		if(!any(blockers, na.rm = TRUE)) {
+			criteria <- criteria[-mark]
+			warning("blockers constraint omitted at level 1 because no ",
+				"coefficients were blocked")
+		}
+		else formals(criteria[[mark]])$blockers <- blockers
+	}
+	return(criteria)
+}
+
+## fills in methodArgs for Rotate, possibly with GUI
+FAiR_fill_methodArgs_Rotate <-
+function(FAobject, criteria, methodArgs) {
+	Lambda  <- loadings(FAobject)
+	factors <- ncol(Lambda)
+
+	if(length(mark <- which(names(criteria) == "no_factor_collapse"))) {
+		text <- paste("Select the minimum acceptable effective variance",
+				"among primary factors.",
+				"\nSetting this threshold too close to zero risks",
+				"factor collapse.")
+		if(is.null(nfc_threshold <- methodArgs$nfc_threshol)) {
+			nfc_threshold <- FAiR_get_number(text, from = 0, to = 1, 
+							by = .01, value = .25)
+		}
+		else methodArgs$nfc_threshold <- NULL
+		if(nfc_threshold <  0) stop("'nfc_threshold' must be >= 0")
+		if(nfc_threshold >= 1) stop("'nfc_threshold' must be < 1")
+		formals(criteria[[mark]])$nfc_threshold <- nfc_threshold
+	}
+
+	if(length(mark <- which(names(criteria) == "limit_correlations"))) {
+		text  <- paste("Select the minimum acceptable correlation",
+				"among primary factors")
+		if(is.null(lower <- methodArgs$lower)) { 
+			lower <- FAiR_get_number(text, from = -1, to = 1,
+							by = .01, value = -1)
+		}
+		else methodArgs$lower <- NULL
+
+		if(lower < -1) stop("'lower' must be >= -1")
+		if(lower >= 1) stop("'lower' must be < 1")
+		formals(criteria[[mark]])$lower <- lower
+
+		text  <- paste("Select the maximum acceptable correlation",
+				"among primary factors")
+		if(is.null(upper <- methodArgs$upper)) { 
+			upper <- FAiR_get_number(text, from = lower, to = 1,
+							by = .01, value = 1)
+		}
+		else methodArgs$upper <- NULL
+
+		if(lower > upper) stop("'lower' must be <= 'upper'")
+		if(upper > 1)     stop("'upper' must be <= 1")
+		formals(criteria[[mark]])$upper <- upper
+
+		if(lower == 0 && upper == 0) {
+			warning("Rotate() does not do orthogonal rotation.",
+				"Ignoring bounds on inter-factor correlations.")
+			criteria <- criteria[-mark]
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "positive_manifold"))) {
+		text <- paste("Select the minimum acceptable reference structure",
+				"correlation.\nA slightly negative number is",
+				"recommended rather than zero")
+		if(is.null(pm_threshold <- methodArgs$pm_threshold)) {
+			pm_threshold <- FAiR_get_number(text, from = -1, to = 0, 
+							by = .01, value = -.1)
+		}
+		else methodArgs$pm_threshold <- NULL
+
+		if(pm_threshold <= -1) stop("'pm_threshold' must be > -1")
+		if(pm_threshold > 0)   stop("'pm_threshold' must be < 0")
+		formals(criteria[[mark]])$pm_threshold <- pm_threshold
+	}
+
+	if(length(mark <- which(names(criteria) == "ranks_rows_1st"))) {
+		if(is.null(row_ranks <- methodArgs$row_ranks)) {
+			orders <- matrix(factors, nrow(Lambda), factors[1])
+			rownames(orders) <- rownames(Lambda)
+			colnames(orders) <- colnames(Lambda)
+			row_ranks <- FAiR_order_FC(orders, level = 1, MARGIN = 1)
+		}
+		else methodArgs$row_ranks <- NULL
+
+		if(!identical(dim(row_ranks), dim(Lambda))) {
+			stop("'row_ranks' must have the same dimension",
+				"as the loading matrix")
+		}
+
+		vals <- unique(c(row_ranks))
+		if(any(! (vals %in% c(1:factors[1])))) {
+			stop("'row_ranks' must only contain positive integers up to ",
+				factors[1])
+		}
+
+		if(all(row_ranks == factors)) {
+			criteria <- criteria[-mark]
+			warning("row ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- row_ranks
+			formals(criteria[[mark]])$MARGIN <- 1
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "ranks_cols_1st"))) {
+		if(is.null(col_ranks <- methodArgs$col_ranks)) {
+			orders <- matrix(nrow(Lambda), nrow(Lambda), factors[1])
+			rownames(orders) <- rownames(Lambda)
+			colnames(orders) <- colnames(Lambda)
+			col_ranks <- FAiR_order_FC(orders, level = 1, MARGIN = 2)
+		}
+		else methodArgs$col_ranks <- NULL
+
+		if(!identical(dim(col_ranks), dim(Lambda))) {
+			stop("'col_ranks' must have the same dimension",
+				"as the loading matrix")
+		}
+		vals <- unique(c(col_ranks))
+		if(any(! (vals %in% c(1:nrow(Lambda))))) {
+			stop("'col_ranks' must only contain positive integers up to ",
+				nrow(Lambda))
+		}
+
+		if(all(col_ranks == nrow(Lambda))) {
+			criteria <- criteria[-mark]
+			warning("column ranks constraint omitted because no ",
+				"constraints were specified")
+		}
+		else {
+			formals(criteria[[mark]])$user_ranks <- col_ranks
+			formals(criteria[[mark]])$MARGIN <- 2
+		}
+	}
+
+	if(length(mark <- which(names(criteria) == "indicators_1st"))) {
+		if(is.null(indicators <- methodArgs$indicators_1st) &&
+		   is.null(indicators <- methodArgs$indicators)) {
+			indicators <- matrix(FALSE, nrow(Lambda), ncol(Lambda))
+			dimnames(indicators) <- dimnames(Lambda)
+			indicators <- FAiR_indicators_FC(indicators, level = 1)
+		}
+
+		if(any(!(indicators %in% c(1:nrow(Lambda), NA)))) {
+			stop("all entries in 'indicators' must be NA or positive",
+				" integers less than ", nrow(Lambda))
+		}
+		formals(criteria[[mark]])$indicators <- indicators
+	}
+
+	if(length(mark <- which(names(criteria) == "evRF_1st"))) {
+		C <- fitted(FAobject, reduced = FALSE, standardized = TRUE)
+		formals(criteria[[mark]])$threshold <- det(C)^(1/ncol(C))
+	}
+
+	if(length(mark <- which(names(criteria) == "evPF_1st"))) {
+		C <- fitted(FAobject, reduced = FALSE, standardized = TRUE)
+		formals(criteria[[mark]])$threshold <- det(C)^(1/ncol(C))
+	}
+
+	if(length(mark <- which(names(criteria) == "no_neg_suppressors_1st"))) {
+		text <- paste("Select the minimum acceptable factor contribution",
+			"coefficient\nsuch that lower values indicate a",
+			"suppressor variable.")
+		if(is.null(FC_threshold <- methodArgs$FC_threshold)) {
+			FC_threshold <- FAiR_get_number(text, from = -1, to = 0,
+							by = .001, value = -.01)
+		}
+		else methodArgs$FC_threshold <- NULL
+
+
+		if(FC_threshold <= -1) stop("'FC_threshold' must be > -1")
+		if(FC_threshold > 0)   stop("'FC_threshold' must be < 0")
+		formals(criteria[[mark]])$FC_threshold <- FC_threshold
+	}
+
+	mark <- length(criteria)
+	if(names(criteria)[mark] == "phi") {
 		text <- paste("In calculating phi, the reference structure correlations",
 				"will be raised to the power 2/c.\nPlease choose c,",
 				"which need not be an integer but is usually taken to be",
 				"1.0 by Thurstone.")
-		c <- FAiR_get_number(text, from = 1, to = 20, by = .1, value = 1)
-		formals(criteria[[length(criteria)]])$c <- c
-	}
-	else if(answer == items["minimaximin"]) {
-		criteria[[length(criteria)+1]] <- FAiR_criterion_minimaximin
-	}
-	else if(answer == items["LS"]) {
-		criteria[[length(criteria)+1]] <- FAiR_criterion_LS
-	}
-	else {
-		criteria[[length(criteria)+1]] <- FAiR_criterion_varphi
-		if(!is.null(weights)) {
-			formals(criteria[[length(criteria)]])$weights <- weights
-			return(criteria)
+		if(is.null(c <- methodArgs$c)) {
+			c <- FAiR_get_number(text, from = 1, to = 20, by = .1, value = 1)
 		}
-		text  <- paste("What kind of weights would you like to use?")
-		items <- c("Dynamic weights", "User-specified weights")
-		weights <- FAiR_get_answer(text, radio_items = items)
-		if(weights == items[[2]]) {
-			weight  <- 1
-			weights <- rep(0, factors - 1)
-			for(i in 1:length(weights)) {
-				weight  <- FAiR_get_number(paste("Select weight", i), 
-					from = 0, to = weight, by = .01, value = weight)
-				weights[[i]] <- weight
+		else methodArgs$c <- NULL
+
+		if(c < 1) stop("'c' must be >= 1.0")
+		formals(criteria[[mark]])$c <- c
+	}
+	else if(names(criteria)[mark] == "varphi") {
+		if(is.null(weights <- methodArgs$weights)) {
+			text  <- paste("What kind of weights would you like to use?")
+			items <- c("Dynamic weights", "User-specified weights")
+			weights <- FAiR_get_answer(text, radio_items = items)
+			if(weights == items[[2]]) {
+				weight  <- 1
+				weights <- rep(0, factors - 1)
+				for(i in 1:length(weights)) {
+					weight <- FAiR_get_number(paste("Select weight",
+							i), from = 0, to = weight, 
+							by = .01, value = 0)
+					weights[i] <- weight
+				}
 			}
-			formals(criteria[[length(criteria)]])$weights <- weights
+			else weights <- -1
 		}
+		else {
+			if(length(weights) != factors - 1) {
+				stop("the length of 'weights' must be ", factors - 1)
+			}
+			else if(any(weights < 0)) {
+				stop("all 'weights' must be >= 0")
+			}
+			else if(any(weights > 1)) {
+				stop("all 'weights' must be <= 1")
+			}
+			else if(!identical(weights, sort(weights, decreasing = TRUE))) {
+				stop("'weights' must be in weakly decreasing order")
+			}
+		}
+		formals(criteria[[mark]])$weights <- weights
 	}
+	else if(names(criteria)[mark] == "LS") {
+		if(!is.null(eps <- methodArgs$eps)) {
+			formals(criteria[[mark]])$eps <- eps
+		}
+		else methodArgs$eps <- NULL
+
+		if(!is.null(scale <- methodArgs$scale)) {
+			formals(criteria[[mark]])$scale <- scale
+		}
+		else methodArgs$scale <- NULL
+
+		if(!is.null(E <- methodArgs$E)) {
+			formals(critiera[[mark]])$E <- E
+		}
+		else methodArgs$E <- NULL
+	}
+	else if(names(criteria)[mark] == "minimaximin") {
+		## Do nothing
+	}
+	else criteria[[mark]] <- FAiR_GPAnator(Lambda, names(criteria)[mark], methodArgs)
+
+	return(criteria)
+}
+
+## make criteria with GUI
+FAiR_make_criteria_GUI <-
+function() {
+	CRITERIA <- c(FAiR_constraints(), FAiR_constraints_1st())
+	CRITERIA$cohyperplanarity_1st <- CRITERIA$dist_cols_1st <-
+		CRITERIA$volume_1st <- CRITERIA$block_1st <- NULL
+
+	criteria <- list()
+
+	# No factor collapse criterion (mandatory)
+	criteria[[1]] <- CRITERIA[["no_factor_collapse"]][[1]]
+	CRITERIA <- CRITERIA[2:length(CRITERIA)]
+
+	# Other restriction criteria
+	items <- sapply(CRITERIA, FUN = function(x) x[[2]])
+	checked <- rep(FALSE, length(items))
+	text <-  paste( "Please indicate which, if any, additional constraints you",
+			"would like to impose.")
+	answer <- FAiR_get_answer(text, check_args = list(items = items, 
+					checked = checked))
+	if(length(answer)) {
+		CRITERIA <- sapply(CRITERIA, FUN = function(x) x[[1]])[names(answer)]
+		criteria <- c(criteria, CRITERIA)
+		names(criteria) <- c("no_factor_collapse", names(answer))
+	}
+	else    names(criteria) <- "no_factor_collapse"
+
+	# Ultimate analytic criterion
+	text   <- paste("Please indicate which analytic criterion should be the ultimate",
+			"criterion during the lexical minimization.")
+	analytics <- FAiR_analytic()
+	items  <- sapply(analytics, FUN = function(x) x[[2]])
+	answer <- FAiR_get_answer(text, radio_items = items, select = 1)
+	answer <- names(analytics)[items == answer]
+	criteria[[length(criteria) + 1]]  <- analytics[[answer]][[1]]
+	names(criteria)[length(criteria)] <- answer
 	return(criteria)
 }

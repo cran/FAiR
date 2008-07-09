@@ -1,0 +1,77 @@
+FAiR 0.4-0 on 07-09-2008 in preparation for the POLMETH conference
+	* New virtual class, "manifest", that encapsulates the left-hand side of the model
+		- Inherited classes: 
+			+ manifest.basic (superclass) if a covariance matrix is passed
+			+ manifest.basic.userW if a weight matrix is also passed  
+			+ manifest.basic.data is the raw numeric data are available
+			+ manifest.data.ordinal if some variables are ordinal
+			+ manifest.data.ranks if the variables have be converted to ranks
+			+ manifest.basic.mcd if the MCD estimator was used
+		- Some methods are written for these classes, mostly just for manifest.basic
+	* New essential function, make_manifest(), to construct a "manifest.*" object
+		- Change in workflow: make_manifest(), make_restrictions(), Factanal() ...
+		- Some of the old functionality of make_restrictions() is now in make_manifest()
+		- New ways to estimate a covariance or correlation matrix
+			+ with missing data, using library(mlest)
+			+ with shrinkage, using library(corpcor) and FAiR_shrink() in Utils.R
+			+ Minimum Covariance Determinant (MCD), much improved over 0.2-0
+			+ based on Spearman rank correlations
+			+ polychoric and polyserial based on hetcor() in library(polycor)
+			+ bootstrapping the covariance matrix is available in many of cases
+	* New virtual class, "parameter", that represents a parameter to be estimated
+		- Inherited classes:
+			+ parameter.cormat for factor intercorrelation matrices
+			+ parameter.coef.{nl,SEFA,SEFA.nl} for primary pattern matrices
+			+ parameter.scale for scale matrices
+		- User internally with the new make_parameter() methods
+	* make_restrictions() is now S4 generic with lots of methods for parameter combinations
+	* New ways of specifying restrictions in make_restrictions()
+		- Much consolidation of pop-up menus making it easier to avoid some of them
+		- Easier to specify things at the command prompt via the new methodArgs argument
+	* New discrepancy functions, including and related to the Asymptotic Distribution Free (ADF)
+		- Elliptical, special case of ADF with common excess kurtosis
+		- Heterogenous Kurtosis (HK), special case of ADF
+		- Shrunk Heterogenous Kurtosis (SHK), special case of ADF
+	* New (correct) implementation of the embedded correlation factor analysis model 
+	* New mapping rules in semi-exploratory factor analysis (SEFA)
+		- Put (some) zeros on high communality variables
+		- Either two or no zeros for each manifest variable
+	* New exact restrictions
+		- Constrain two or more coefficients to be equal to each other
+		- Arbitrary restrictions where one or more coefficients is some function of the others
+	* New inequality restrictions
+		- Order restrictions on factor contributions by row and / or column
+		- Designate the "best" indicators for any factor
+		- Prohibit some coefficients from being zero in SEFA
+		- Require a minimum binary distance between columns of the primary pattern matrix
+	* New inherited classes for EFA: restrictions.1storder.EFA and FA.EFA
+	* New (oblique) analytic transformation criteria from the GPArotation library
+		- Thanks to Coen Bernaards, Paul Gilbert, and Robert Jennrich for relicensing GPArotation
+		- Can use the reference structure or factor contribution matrix during transformation
+		- New convenience function, GPA2FA(), to convert a result from GPFoblq() or GPForth()
+	* New S4 generic functions and overhaul of previous S4 generic functions to ease development
+		- restrictions2model(), which is new and at the core of most everything
+		- restrictions2draws() and FA2draws(), which are new and used to estimate uncertainty
+		- restrictions2RAM(), which is new and converts to the RAM format of library(sem)
+		- cormat(), which is new and extracts correlation matrices
+		- uniquenesses(), which is new and extracts unique variances
+		- loadings(), which masks that in the stats library and extracts loadings
+		- gr_fitS4(), which is much improved but is now only used for MLE estimation
+	* Finally saw the light on S4 and converted all the S3 methods to S4 methods
+	* New export functions
+		- restrictions2Mathomatic(), which converts model to form used by Mathomatic
+		- write.cefa(), which converts preliminary loadings to form used by CEFA
+	* New tools for model comparison
+		- New functions, model_comparison() and paired_comparison()
+		- Incorporate contributions from Anne Boomsma and Walter Herzog
+			+ A correction to the test statistic suggested in Swain's dissertation
+			+ Improved RMSEA calculation
+			+ Steiger's gamma
+			+ McDonald's Centrality Index
+		- Many ADF-related test statistics suggested by Bentler and his coauthors
+	* plot() on an object that inherits from class FA now produces a Directed Acyclic Graph
+	* pairs() now depicts the correlation among the reference factors in the lower triangle
+
+
+FAiR 0.2-0 on 01-31-2008 in honor of the date in the preface of Allen Yates' book
+	* Initial release for CRAN

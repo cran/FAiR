@@ -1,0 +1,36 @@
+The functions in the following files, 
+
+        FAiR/R/TestStatistics.R
+        FAiR/R/GPLv3_or_later.R
+        FAiR/R/GPArotation.R
+
+are licensed under the GNU General Public License version 3 (or at your option) any 
+later version because they contain modifications to code that is either licensed 
+under the GNU General Public License version 2 (or at your option) any later 
+version or under the GNU General Public License version 3 (or at your option)
+any later version.
+
+The rest is licensed the GNU Affero General Public License version 3 (or at your 
+option) any later version. To quite the particularly applicable part of the
+GNU Affero General Public License version 3:
+
+  "13. Remote Network Interaction; Use with the GNU General Public License.
+
+  Notwithstanding any other provision of this License, if you modify the
+Program, your modified version must prominently offer all users
+interacting with it remotely through a computer network (if your version
+supports such interaction) an opportunity to receive the Corresponding
+Source of your version by providing access to the Corresponding Source
+from a network server at no charge, through some standard or customary
+means of facilitating copying of software.  This Corresponding Source
+shall include the Corresponding Source for any work covered by version 3
+of the GNU General Public License that is incorporated pursuant to the
+following paragraph.
+
+  Notwithstanding any other provision of this License, you have
+permission to link or combine any covered work with a work licensed
+under version 3 of the GNU General Public License into a single
+combined work, and to convey the resulting work.  The terms of this
+License will continue to apply to the part which is the covered work,
+but the work with which it is combined will remain governed by version
+3 of the GNU General Public License."
