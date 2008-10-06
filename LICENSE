@@ -4,14 +4,14 @@ The functions in the following files,
         FAiR/R/GPLv3_or_later.R
         FAiR/R/GPArotation.R
 
-are licensed under the GNU General Public License version 3 (or at your option) any 
-later version because they contain modifications to code that is either licensed 
-under the GNU General Public License version 2 (or at your option) any later 
-version or under the GNU General Public License version 3 (or at your option)
-any later version.
+are licensed under the GNU General Public License version 3 (or at your option any 
+later version) because they contain modifications to code that is either licensed 
+under the GNU General Public License version 2 (or at your option any later 
+version) or under the GNU General Public License version 3 (or at your option
+any later version).
 
 The rest is licensed the GNU Affero General Public License version 3 (or at your 
-option) any later version. To quite the particularly applicable part of the
+option any later version). To quite the particularly applicable part of the
 GNU Affero General Public License version 3:
 
   "13. Remote Network Interaction; Use with the GNU General Public License.

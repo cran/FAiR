@@ -954,7 +954,7 @@ function(object) {
 setValidity("manifest.basic", valid_manifest.basic)
 
 ## only the covariance matrix and the W matrix are available
-setClass("manifest.basic.userW", representation("manifest.basic", acov = "denseMatrix"),
+setClass("manifest.basic.userW", representation("manifest.basic", acov = "dMatrix"),
 	package = "FAiR"
 
 # Slots:
@@ -995,7 +995,7 @@ setValidity("manifest.basic.userW", valid_manifest.userW)
 setClass("manifest.data", representation("manifest.basic",# extends manifest.basic
 					X = "matrix",     # data matrix
 					wt = "numeric",   # numeric vector of weights
-					acov = "denseMatrix"), # covmat of covmat
+					acov = "dMatrix"), # covmat of covmat
 	package = "FAiR"
 
 # Slots:

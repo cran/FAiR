@@ -48,7 +48,7 @@ from \code{\link{manifest-class}}.
 \S4method{cormat}{restrictions.2ndorder}(object, level = 1)
 \S4method{uniquenesses}{FA}(object, standardized = TRUE)
 \S4method{uniquenesses}{FA.general}(object, standardized = TRUE, level = 1)
-\S4method{uniquenesses}{restrictions}(object)
+\S4method{uniquenesses}{restrictions}(object, standardized = TRUE)
 }
 \arguments{
   \item{object}{an object that inherits from \code{\link{FA-class}} or \code{\link{restrictions-class}}}

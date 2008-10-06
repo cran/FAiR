@@ -24,13 +24,13 @@
 \S4method{df.residual}{FA}(object)
 \S4method{df.residual}{restrictions}(object)
 \S4method{fitted}{FA}(object, reduced = TRUE, standardized = TRUE)
-\S4method{fitted}{restrictions}(object)
+\S4method{fitted}{restrictions}(object, reduced = TRUE, standardized = TRUE)
 \S4method{influence}{FA}(model)
 \S4method{model.matrix}{FA}(object, standardized = TRUE)
 \S4method{pairs}{FA}(x, ...)
 \S4method{residuals}{FA}(object, standardized = TRUE)
 \S4method{rstandard}{FA}(model)
-\S4method{simulate}{FA}(object, nsim = 1, seed = NULL, standardized = TRUE)
+\S4method{simulate}{FA}(object, nsim = 1, seed = NULL, standardized = TRUE, ...)
 \S4method{weights}{FA}(object)
 }
 \arguments{

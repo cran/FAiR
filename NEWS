@@ -1,3 +1,9 @@
+FAiR 0.4-2 on 10-06-2008 to fix documentation
+	* Only cosmetic changes
+
+FAiR 0.4-1 on 10-03-2008 to fix breakage
+	* The acov slot of a manifest is temporarily of class "dMatrix"
+
 FAiR 0.4-0 on 07-09-2008 in preparation for the POLMETH conference
 	* New virtual class, "manifest", that encapsulates the left-hand side of the model
 		- Inherited classes: 
