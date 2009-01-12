@@ -12,7 +12,7 @@
 \alias{BIC,FA-method}
 \alias{confint,FA-method}
 \alias{logLik,FA-method}
-\alias{plot,FA,ANY-method}
+\alias{plot,FA,missing-method}
 \alias{profile,FA-method}
 \alias{show,FA-method}
 \alias{summary,FA-method}

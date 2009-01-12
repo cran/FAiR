@@ -10,7 +10,7 @@
 \alias{cormat,manifest.basic-method}
 \alias{model.matrix,manifest.basic-method}
 \alias{show,manifest.basic-method}
-\alias{plot,manifest.basic,ANY-method}
+\alias{plot,manifest.basic,missing-method}
 \alias{screeplot,manifest.basic-method}
 \title{Class "manifest"}
 \description{

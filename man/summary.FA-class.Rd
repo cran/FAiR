@@ -29,8 +29,8 @@ The \code{summary} method does so internally.
       of first-order factors that can be used to reorder the factors when
       printed to the screen}
     \item{\code{polarity}:}{An integer vector of the same length as the 
-      number of first-order factors whose elements are either \eqn(1L) or
-      \eqn{-1L} that can be used to change the direction of one or more
+      number of first-order factors whose elements are either \eqn{1} or
+      \eqn{-1} that can be used to change the direction of one or more
       factors (after they have been reordered)}
     \item{\code{conf.level}:}{A number between zero and one exclusive that
       governs the bounds of the confidence intervals}

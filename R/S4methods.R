@@ -3350,14 +3350,14 @@ function(object) {
 })
 
 # plot cormat
-setMethod("plot", "manifest.basic",
-function(x, y, ...) { 
+setMethod("plot", signature(x = "manifest.basic", y = "missing"),
+function(x, ...) { 
 	heatmap(cormat(x), ...)
 })
 
 # plot mcd stuff and cormat
-setMethod("plot", "manifest.data.mcd",
-function(x, y, ...) {
+setMethod("plot", signature(x = "manifest.data.mcd", y = "missing"),
+function(x, ...) {
 	plot(x@mcd, ask = TRUE, ...)
 	heatmap(cormat(x), ...)
 })
@@ -3461,8 +3461,8 @@ function(object) {
 
 # these plot methods produce DAGs by post-hoc hacking of FAiR_DAG() which is basically
 # just Bill Revelle's fa.graph() function
-setMethod("plot", "FA", 
-function (x, y = NULL, out.file = NULL, ...) {
+setMethod("plot", signature(x = "FA", y = "missing"),
+function (x, out.file = NULL, ...) {
 	graph <- FAiR_DAG(x, ...)
 	if(!FAiR_is.orthogonal(x)) {
 		Phi <- cormat(x)
@@ -3494,8 +3494,8 @@ function (x, y = NULL, out.file = NULL, ...) {
 	invisible(graph[[1]])
 })
 
-setMethod("plot", "FA.general", 
-function (x, y = NULL, out.file = NULL, ...) {
+setMethod("plot", signature(x = "FA.general", y = "missing"),
+function (x, out.file = NULL, ...) {
 	graph  <- FAiR_DAG(x, ...)
 	graph2 <- FAiR_DAG(x, level = 2, ...)
 	graph$nodeAttrs$shape <- c(graph2$nodeAttrs$shape, graph$nodeAttrs$shape)
@@ -3511,8 +3511,8 @@ function (x, y = NULL, out.file = NULL, ...) {
 	invisible(graph[[1]])
 })
 
-setMethod("plot", "FA.2ndorder", 
-function (x, y = NULL, out.file = NULL, ...) {
+setMethod("plot", signature(x = "FA.2ndorder", y = "missing"),
+function (x, out.file = NULL, ...) {
 	graph  <- FAiR_DAG(x, ...)
 	graph2 <- FAiR_DAG(x, level = 2, ...)
 	Xi <- cormat(x, level = 2)

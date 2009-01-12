@@ -1,3 +1,10 @@
+FAiR 0.4-4 on 01-12-2009 to fix another warning from R-devel
+	* Missed one warning last time
+
+FAiR 0.4-3 on 01-09-2009 to fix warnings from R-devel
+	* Changes in the signature to the plot methods
+	* Fix manpages to comply with experimental parser
+
 FAiR 0.4-2 on 10-06-2008 to fix documentation
 	* Only cosmetic changes
 

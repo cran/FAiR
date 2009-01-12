@@ -271,7 +271,7 @@ menu asking for them. See the vignette for formal definitions of these restricti
   \strong{name} \tab \strong{methodArgs} \tab \strong{reminder of what function does}\cr
   \code{"ranks_rows_XXX"}  \tab \code{row_ranks} \tab row-wise ordering constraints\cr
   \code{"ranks_cols_XXX"}  \tab \code{col_ranks} \tab column-wise ordering constraints\cr
-  \code{"indicators_XXX} \tab \code{indicators} \tab designate which is the best indicator of a factor\cr
+  \code{"indicators_XXX"} \tab \code{indicators} \tab designate which is the best indicator of a factor\cr
   \code{"evRF_XXX"}  \tab none \tab restrict effective variance of reference factors\cr
   \code{"evPF_XXX"}  \tab none \tab restrict effective variance of primary factors\cr  
   \code{"h2_over_FC_XXX"}  \tab none \tab communalities \eqn{>=} factor contributions\cr

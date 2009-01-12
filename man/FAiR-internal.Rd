@@ -57,9 +57,9 @@
 
 \alias{loadings,restrictions.factanal-method}
 
-\alias{plot,FA.general,ANY-method}
-\alias{plot,FA.2ndorder,ANY-method}
-\alias{plot,manifest.data.mcd,ANY-method}
+\alias{plot,FA.general,missing-method}
+\alias{plot,FA.2ndorder,missing-method}
+\alias{plot,manifest.data.mcd,missing-method}
 
 \alias{profile,FA.general-method}
 \alias{profile,FA.2ndorder-method}
