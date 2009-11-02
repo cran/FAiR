@@ -435,41 +435,38 @@ read.cefa <- read.CEFA <-
 function(file) {
 	lines <- readLines(file)
 
-	n.obs <- as.integer(strsplit(lines[[1]], split = " ", extended = FALSE)[[1]][1])
+	n.obs <- as.integer(strsplit(lines[[1]], split = " ")[[1]][1])
 
-	datatype <- grep("([D|d]ata", lines, extended = FALSE)
+	datatype <- grep("([D|d]ata", lines)
 	if(length(datatype) == 0) datatype <- lines[2]
-	datatype <- as.integer(strsplit(lines[datatype[1]], split = "", 
-					extended = FALSE)[[1]][1])
+	datatype <- as.integer(strsplit(lines[datatype[1]], split = "")[[1]][1])
 
 	if(datatype == 3) {
 		stop("importing a factor loading matrix is not supportable", 
 			" please import the raw data or the covariance matrix")
 	}
 
-	varnames_marker <- grep("([V|v]ariable", lines, extended = FALSE)
+	varnames_marker <- grep("([V|v]ariable", lines)
 	if(length(varnames_marker) == 0) varnames_marker <- 4
 	else varnames_marker <- varnames_marker[1]
 
-	varnames <- as.integer(strsplit(lines[varnames_marker], split = "",
-					extended = FALSE)[[1]][1])
+	varnames <- as.integer(strsplit(lines[varnames_marker], split = "")[[1]][1])
 	if(varnames == 1) {
 		varnames <- as.character(NULL)
 		varnames_marker <- varnames_marker + 1
 		while(varnames_marker) {
 			if(length(grep("[a-z]", lines[varnames_marker], 
-					ignore.case = TRUE, extended = FALSE)) > 0) {
+					ignore.case = TRUE)) > 0) {
 					
 					tempnames <- strsplit(lines[varnames_marker],
-							split = " ", extended = FALSE)
-					if(length(grep("^[\\s]*[0-9]", tempnames[[1]][1], 
-						extended = FALSE)) > 0) break
+							split = " ")
+					if(length(grep("^[\\s]*[0-9]",tempnames[[1]][1])))
+						break
 					varnames <- c(varnames, unlist(sapply(tempnames,
 							FUN = function(x) x[x!=""])))
 					varnames_marker <- varnames_marker + 1
 				}
-			else if(length(grep("[0-9]", lines[varnames_marker],
-					extended = FALSE)) > 0) break
+			else if(length(grep("[0-9]", lines[varnames_marker])) > 0) break
 			else {
 				varnames <- NULL
 				warning("there was problem assigning variable names")
@@ -484,16 +481,16 @@ function(file) {
 	}
 
 	lines <- lines[-c(1:6)]
-	mark <- grep("[a-z]", lines, ignore.case = TRUE, extended = TRUE)
+	mark <- grep("[a-z]", lines, ignore.case = TRUE)
 	if(length(mark) > 0) lines <- lines[-mark]
 	
-	mark <- grep("[\\?|\\+|\\-]", lines, extended = TRUE)
+	mark <- grep("[\\?|\\+|\\-]", lines)
 	if(length(mark) > 0) lines <- lines[-mark]
 
-	lines <- lines[grep("[^0123456789]",  lines, extended = TRUE)]
+	lines <- lines[grep("[^0123456789]",  lines)]
 
 	if(datatype == 1) { # covariance matrix
-		lines <- strsplit(lines, split = " ", extended = FALSE)
+		lines <- strsplit(lines, split = " ")
 		lines <- lapply(lines, FUN = function(x) as.numeric(x[x!=""]))
 		out <- matrix(0, nrow = length(lines), 
 				 ncol = length(lines[[length(lines)]]))

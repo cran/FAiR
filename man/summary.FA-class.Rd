@@ -28,6 +28,7 @@ The \code{summary} method does so internally.
     \item{\code{order}:}{An integer vector of the same length as the number
       of first-order factors that can be used to reorder the factors when
       printed to the screen}
+    \item{\code{orthogonal}:}{A logical indicating whether the factors are orthogonal}
     \item{\code{polarity}:}{An integer vector of the same length as the 
       number of first-order factors whose elements are either \eqn{1} or
       \eqn{-1} that can be used to change the direction of one or more
