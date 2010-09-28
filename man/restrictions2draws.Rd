@@ -1,5 +1,4 @@
 \name{restrictions2draws}
-\docType{genericFunction}
 \docType{methods}
 \alias{restrictions2draws}
 \alias{restrictions2draws-methods}

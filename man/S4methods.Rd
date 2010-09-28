@@ -1,5 +1,4 @@
 \name{S4GenericsFAiR}
-\docType{genericFunction}
 \docType{methods}
 \alias{S4GenericsFAiR}
 \alias{fitS4}

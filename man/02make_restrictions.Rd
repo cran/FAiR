@@ -1,5 +1,4 @@
 \name{make_restrictions}
-\docType{genericFunction}
 \docType{methods}
 \alias{make_restrictions}
 \alias{make_restrictions-methods}

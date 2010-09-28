@@ -1,5 +1,4 @@
 \name{restrictions2model}
-\docType{genericFunction}
 \docType{methods}
 \alias{restrictions2model}
 \alias{restrictions2model-methods}

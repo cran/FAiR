@@ -1,5 +1,4 @@
 \name{loadings}
-\docType{genericFunction}
 \docType{methods}
 \alias{loadings}
 \alias{cormat}

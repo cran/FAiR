@@ -1,5 +1,4 @@
 \name{restrictions2RAM}
-\docType{genericFunction}
 \docType{methods}
 \alias{restrictions2RAM}
 \alias{restrictions2RAM-methods}

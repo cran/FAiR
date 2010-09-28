@@ -1,5 +1,4 @@
 \name{make_manifest}
-\docType{genericFunction}
 \docType{methods}
 \alias{make_manifest}
 \alias{make_manifest-methods}

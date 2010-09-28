@@ -43,6 +43,7 @@ read.triangular(file = "", diag = TRUE,
 \seealso{\code{\link{make_manifest}}}
 
 \examples{
+\dontrun{
 R.DHP <- read.triangular(diag=FALSE, names=c("ROccAsp", "REdAsp", "FOccAsp", 
                 "FEdAsp", "RParAsp", "RIQ", "RSES", "FSES", "FIQ", "FParAsp"),
                 nlines = 9)
@@ -57,6 +58,6 @@ R.DHP <- read.triangular(diag=FALSE, names=c("ROccAsp", "REdAsp", "FOccAsp",
     .0760  .0702  .2784  .1988  .1147  .1021  .0931 -.0438  .2087
 
 R.DHP
-}
+}}
 \keyword{ manip }
 

@@ -1,7 +1,5 @@
 \name{create_FAobject}
-\docType{genericFunction}
 \docType{methods}
-\docType{class}
 \alias{create_FAobject}
 \alias{create_FAobject-methods}
 \alias{create_FAobject,restrictions,manifest.basic-method}

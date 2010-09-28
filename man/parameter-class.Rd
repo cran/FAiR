@@ -1,6 +1,4 @@
 \name{parameter-class}
-\docType{class}
-\docType{genericFunction}
 \docType{methods}
 \alias{parameter-class}
 \alias{parameter.cormat-class}
