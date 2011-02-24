@@ -15,7 +15,7 @@ importFrom(stats, fitted, residuals, rstandard, model.matrix, simulate,
                   influence, df.residual, deviance, weights)
 
 # From stats4
-importFrom(stats4, BIC, logLik, coef, vcov, plot, confint, profile)
+importFrom(stats4, logLik, coef, vcov, plot, confint, profile)
 
 # From FAiR
 # Compiled code thing
@@ -57,7 +57,7 @@ exportClasses(equality_restriction,
               summary.FA)
 
 # Export formal S4 methods
-exportMethods(BIC, logLik, pairs, fitted, residuals, rstandard, weights, influence, df.residual, 
+exportMethods(logLik, pairs, fitted, residuals, rstandard, weights, influence, df.residual, 
               deviance, model.matrix, simulate, screeplot, show, coef, vcov, plot, summary,
               confint, profile, predict,restrictions2model, fitS4, bfgs_fitS4, gr_fitS4, 
               bfgs_helpS4, create_start, create_FAobject, restrictions2draws, restrictions2RAM, 

@@ -2751,10 +2751,10 @@ function (object) {
 })
 
 # get Bayesian Information Criterion (no 2 * pi correction)
-setMethod("BIC", signature(object = "FA"),
-function (object) { 
-        BIC(logLik(object))
-})
+# setMethod("BIC", signature(object = "FA"),
+# function (object) { 
+#         BIC(logLik(object))
+# })
 
 # get CIs from FAobject
 setMethod("confint", signature(object = "FA"), definition = 

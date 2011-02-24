@@ -24,8 +24,8 @@
 
 .onAttach <- function( ... ) {
 FAiRLib <- dirname(system.file(package = "FAiR"))
-version <- packageDescription("FAiR", lib = FAiRLib)$Version
-BuildDate <- packageDescription("FAiR", lib = FAiRLib)$Date
+version <- packageDescription("FAiR", lib.loc = FAiRLib)$Version
+BuildDate <- packageDescription("FAiR", lib.loc = FAiRLib)$Date
 cat(paste("\n##  FAiR Version", version, "Build Date:", BuildDate, "\n"))
 cat("## See http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair for more info")
 cat("\nFAiR  Copyright (C) 2008  Benjamin King Goodrich\n")

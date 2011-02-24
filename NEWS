@@ -1,3 +1,6 @@
+FAiR 0.4-7 on 02-24-2011 to fix a potential clash with stats4
+	* Actually, the 0.4-5 and 0.4-6 fixed similarly minor issues
+
 FAiR 0.4-4 on 01-12-2009 to fix another warning from R-devel
 	* Missed one warning last time
 

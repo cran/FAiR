@@ -28,9 +28,9 @@ characterize testable hypotheses.
 Package: \tab FAiR\cr
 Type: \tab Package\cr
 URL: \tab \url{http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair}\cr
-Version: \tab 0.4-0\cr
-Date: \tab 2008-07-09\cr
-License: \tab See the LICENSE file for details. 
+Version: \tab 0.4-7\cr
+Date: \tab 2010-02-24\cr
+License: \tab AGPL (>= 3.0) but see the LICENSE file for details
 }
 
 Let the factor analysis model in the population be
