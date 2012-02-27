@@ -48,7 +48,7 @@ Steiger and Lind 1980) to conduct a test of \dQuote{close fit}, namely that the 
 is in turn used to calculate Steiger's (1989) \eqn{\gamma}{gamma} index. In the maximum likelihood case,
 both of these are affected by the \code{correction} factor.
 
-If the traditional maximum likelihood discrepancy function is used, then the \code{\link[stats4]{BIC}} and
+If the traditional maximum likelihood discrepancy function is used, then the BIC and
 SIC (Stochastic Information Criterion, see Preacher 2006 and Preacher, Cai, and MacCallum 2007) are
 calculated. These information criteria can be used to compare nonnested models and in both cases,
 smaller is better.

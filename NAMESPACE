@@ -15,7 +15,7 @@ importFrom(stats, fitted, residuals, rstandard, model.matrix, simulate,
                   influence, df.residual, deviance, weights)
 
 # From stats4
-importFrom(stats4, logLik, coef, vcov, plot, confint, profile)
+importFrom(stats4, logLik, coef, vcov, plot, confint, profile, summary)
 
 # From FAiR
 # Compiled code thing

@@ -308,42 +308,6 @@ function(x, corr = TRUE, eig.tol = 1e-06, conv.tol = 1e-07,
 	return(X)
 }
 
-## estimate numeric Hessian
-FAiR_Hessian <- 
-function(par, restrictions, manifest, lower) {
-	## This function is slightly modified from stats:::optim, which is 
-        ## Copyright 1995-2007 R Core Development Team and licensed under GPL V2+
-	if(is(restrictions, "restrictions.factanal")) { 
-		help <- list()
-	}
-	else {
-		restrictions@model <- "CFA"
-		help <- bfgs_helpS4(par, restrictions, manifest, done = TRUE, lower)
-	}
-
-	fn1 <- function(par) bfgs_fitS4(par, restrictions, manifest, help, lower)
-
-	if(FAiR_is.ML(restrictions)) {
-		gr1 <- function(par)   gr_fitS4(par, restrictions, manifest, help, lower)
-	}
-	else if(FAiR_is.QD(restrictions)) {
-		gr1 <- function(par) {
-				FAiR_gradient_QD(par, restrictions, manifest, help, lower)
-		}
-	}
-	else stop("this should not have happened, please contact FAiR maintainer")
-
-	con <- list(trace = 0, fnscale = -1, parscale = rep.int(1, length(par)),
-		ndeps = rep.int(0.001, length(par)), maxit = 100, 
-		abstol = -Inf, reltol = sqrt(.Machine$double.eps), alpha = 1, 
-		beta = 0.5, gamma = 2, REPORT = 10, type = 1, lmm = 5, 
-		factr = 1e+07, pgtol = 0, tmax = 10, temp = 10)
-
-	hess <- .Internal(optimhess(par, fn1, gr1, con))
-	hess <- 0.5 * (hess + t(hess))
-	return(hess)
-}
-
 ## throws warning if condition is not satisfied
 FAiR_warnifnot <-
 function(...) {
