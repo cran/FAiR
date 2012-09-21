@@ -459,6 +459,6 @@ function (object, name, check = TRUE, value) {
         ## Copyright 1995-2007 R Core Development Team and licensed under GPL V2+
 
 #       if(check) value <- checkSlotAssignment(object, name, value)
-      .Call("R_set_slot", object, name, value, PACKAGE="methods")
+      .Call("FAiR_do_slot_assign", object, name, value, PACKAGE="FAiR")
 
 }

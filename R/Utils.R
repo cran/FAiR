@@ -246,7 +246,6 @@ function(Tmat) {
 # 	if(any(cS < (ncol(coefs) - 1))) return(FAiR_uniquify(0))
 # 	if(any(cS > (nrow(coefs) - 2))) return(FAiR_uniquify(0))
 # 	if(any(apply(coefs, 1, all)))   return(FAiR_uniquify(0))
-# 	jit(1) ## MAYBE you can go with jit = 2 here
 # 	for(p in 1:ncol(coefs)) {
 # 		subcoefs <- coefs[coefs[,p],, drop = FALSE]
 # 		for(k in 1:nrow(subcoefs)) {
@@ -267,7 +266,6 @@ function(coefs) {
 	if(any(cS < (ncol(coefs) - 1))) return(FAiR_uniquify(0))
 	if(any(cS > (nrow(coefs) - 2))) return(FAiR_uniquify(0))
 	if(any(apply(coefs, 1, all)))   return(FAiR_uniquify(0))
-	jit(1)
 	for(p in 1:ncol(coefs)) {
 		subcoefs <- coefs[coefs[,p],-p, drop = FALSE]
 		cS <- colSums(subcoefs)
@@ -678,7 +676,6 @@ function(C, diag = TRUE, inverse = TRUE) { # NOTE: C must be symmetric (duh)
 	intmat[lt] <- 1:length(vecs)
 	t_intmat <- t(intmat)
 	mark <- 1
-	jit(2) ## jit(2) seems safe in this case
 	for(j in 1:ncol(C)) for(i in 1:nrow(C)) {
 		if(i >= j) Kp[mark,  intmat[mark]] <- 1
 		else       Kp[mark,t_intmat[mark]] <- 1
@@ -1002,7 +999,6 @@ FAiR_ADF_unbiased <- function(x, unbiased = TRUE, robust = TRUE, alpha = 3/4) {
 		covmat <- cov.wt(x)
 		x <- sweep(x, 2, colMeans(x))
 	}
-	jit(1) ## do NOT do jit = 2 here (yet)
 	for(i in 1:ncol(x)) for(j in i:ncol(x)) {
 		s_ij <- covmat$cov[i,j]
 		for(k in i:ncol(x)) for(l in k:ncol(x)) {
@@ -1149,7 +1145,6 @@ function(beta) {
 # 	else gradients <- matrix(0, nrow = 0.5 * nrow(coef) * (nrow(coef) - 1),
 # 				    ncol = length(coef))
 # 	mark <- 1
-# 	jit(2) ## jit = 2 seems safe here
 # 	for(j in 1:ncol(coef)) for(i in 1:nrow(coef)) {
 # 		temp <- matrix(0, nrow(coef), nrow(coef))
 # 		temp[,i] <- betaPhi[,j]
@@ -1229,7 +1224,6 @@ FAiR_AM_GM_ratio <-
 function(x) {
 	y <- 0
 	z <- 1
-	jit(1)
 	for(i in 1:length(x)) {
 		if(x[i] < 0) return(NA_real_)
 		y <- y + x[i]
@@ -2018,7 +2012,6 @@ FAiR_elliptical <- function(manifest) {
 	Gamma  <- matrix(0, p_star, p_star)
 	lowers <- which(lower.tri(Gamma, TRUE))
 	count  <- 1
-	jit(1) ## do NOT do jit = 2 here (yet)
 	for(i in 1:ncol(X)) for(j in i:ncol(X)) {
 		s_ij <- S[i,j]
 		for(k in i:ncol(X)) {
@@ -2066,7 +2059,6 @@ FAiR_HK <- function(manifest, shrink = FALSE) {
 	Gamma  <- matrix(0, p_star, p_star)
 	lowers <- which(lower.tri(Gamma, TRUE))
 	count  <- 1
-	jit(1) ## do NOT do jit = 2 here (yet)
 	for(i in 1:ncol(X)) for(j in i:ncol(X)) {
 		s_ij <- S[i,j]
 		a_ij <- (K[i] + K[j]) / 2
@@ -2523,7 +2515,6 @@ function(fitted, delta, number, plot.it, ...) {
 		cat("Factors may arbitrarily be plotted in a different order than they",
 			" appear in summary()\n")
 	}
-	jit(2) ## 2 seems safe here
 	for(p in 1:ncol(notfree)) for(j in 1:nrow(notfree)) if(notfree[j,p]) {
 		y <- x <- rep(NA_real_, length(width))
 		val <- beta[j,p]

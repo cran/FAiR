@@ -14,9 +14,6 @@
     You should have received a copy of the GNU Affero General Public License
     along with FAiR.  If not, see <http://www.gnu.org/licenses/>.
 */
-using namespace std;
-
-extern "C" {
 
 	void
 	FAiR_QD_sum(double *sum, const double *x, const double *middle, 
@@ -88,4 +85,3 @@ extern "C" {
 			grad[i] = -2 * temp;
 		}
 	}
-}

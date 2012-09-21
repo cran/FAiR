@@ -55,7 +55,6 @@ function(coefs, cormat, zeros = rep(ncol(coefs), ncol(coefs)),
 		Upsilon.abs <- abs(Upsilon)
 		orderer <- order(c(Upsilon.abs))
 		changed <- rep(0, ncol(coefs))
-		jit(1)
 		for(i in 1:length(orderer)) { ## explain logic here
 			dims <- which(coefs == coefs[orderer[i]], arr.ind = TRUE)
 			if(changed[dims[1,2]] == ncol(coefs)) next
@@ -72,7 +71,6 @@ function(coefs, cormat, zeros = rep(ncol(coefs), ncol(coefs)),
 	else if(Butler) { # r tests of complexity 1
 		biggest <- apply(abs(coefs), 2, which.max)
 		if(length(unique(biggest)) < ncol(coefs)) return(coefs) # will fail check
-		jit(1)
 		for(i in 1:ncol(coefs)) coefs[biggest[i], -i] <- 0
 		if(all(zeros < ncol(coefs))) return(coefs) # can add more zeros otherwise
 		Upsilon <- t(t(coefs) / D_inv)
@@ -80,7 +78,6 @@ function(coefs, cormat, zeros = rep(ncol(coefs), ncol(coefs)),
 
 	else if(quasi_Yates) { # cohyperplanarity with minimal collinearity
 		FC <- coefs * (coefs %*% cormat)
-		jit(1)
 		for(i in 1:ncol(coefs)) {
 			diffs <- FC - FC[,i]
 			coefs[apply(diffs, 2, which.max)[-i], i] <- 0
@@ -91,7 +88,6 @@ function(coefs, cormat, zeros = rep(ncol(coefs), ncol(coefs)),
 
 	else if(viral) { # r zeros per column bunched in tests of complexity r - 2
 		Upsilon_abs <- abs(Upsilon)
-		jit(1) ## do NOT do jit = 2 here (yet)
 		for(i in 1:(ncol(coefs) - 1)) {
 			ranks <- order(Upsilon_abs[,i])
 			marks <- rep(FALSE, ncol(coefs))
@@ -133,7 +129,6 @@ function(coefs, cormat, zeros = rep(ncol(coefs), ncol(coefs)),
 		smallest <- apply(abs(Upsilon), 1, which.min)
 		orderer <- order(ratios, decreasing = TRUE)
 		unchanged <- rep(TRUE, ncol(coefs))
-		jit(1)
 		for(i in 1:length(orderer)) {
 			so <- smallest[orderer[i]]
 			if(unchanged[so]) {

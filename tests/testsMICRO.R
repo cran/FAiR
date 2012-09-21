@@ -1,4 +1,4 @@
-notests <- TRUE
+notests <- FALSE
 if(notests) q(save = "no")
 stopifnot(require(FAiR))
 

@@ -28,7 +28,7 @@ version <- packageDescription("FAiR", lib.loc = FAiRLib)$Version
 BuildDate <- packageDescription("FAiR", lib.loc = FAiRLib)$Date
 packageStartupMessage(paste("##  FAiR Version", version, "Build Date:", BuildDate))
 packageStartupMessage("## See http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair for more info")
-packageStartupMessage("FAiR  Copyright (C) 2008  Benjamin King Goodrich")
+packageStartupMessage("FAiR  Copyright (C) 2008 -- 2012  Benjamin King Goodrich")
 packageStartupMessage("This program comes with ABSOLUTELY NO WARRANTY.")
 packageStartupMessage("This is free software, and you are welcome to redistribute it")
 packageStartupMessage("under certain conditions, namely those specified in the LICENSE file")

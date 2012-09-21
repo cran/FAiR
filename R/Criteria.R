@@ -124,7 +124,6 @@ function(fn = NULL, onecol = FALSE) {
 		ranks <- apply(-FC, MARGIN = 2, FUN = rank, ties.method = "min")
 		out <- 0
 		denom <- ncol(ranks)
-		jit(1)
 		for(i in 1:ncol(ranks)) {
 			mark <- indicators_2nd[i]
 			if(is.na(mark)) denom <- denom - 1
@@ -334,7 +333,6 @@ function(fn = NULL, onecol = FALSE) {
 		ranks <- apply(-FC, MARGIN = 2, FUN = rank, ties.method = "min")
 		out <- 0
 		denom <- ncol(ranks)
-		jit(1)
 		for(i in 1:ncol(ranks)) {
 			mark <- indicators[i]
 			if(is.na(mark)) denom <- denom - 1

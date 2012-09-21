@@ -213,7 +213,7 @@ function(manifest, factors = NULL, model = c("SEFA", "EFA", "CFA"),
 			x <- matrix(NA_real_, nrow = n, ncol = factors[1])
 			x[upper.tri(x)] <- 0
 			rownames(x) <- rownames(S)
-			free <- !is.na(x)
+			free <- is.na(x)
 			beta <- new("parameter.coef", x = x, free = free, 
 					num_free = sum(free), invalid = 0.0)
 			return(make_restrictions(manifest = manifest, beta = beta,
@@ -2806,7 +2806,6 @@ function (fitted, delta = 0.05, number = 100, plot.it = TRUE, ...) {
 			cat("Factors may arbitrarily be plotted in a different order",
 				" than they appear in summary()\n")
 		}
-		jit(1)
 		for(j in 1:nrow(notfree)) if(notfree[j,1]) {
 			y <- x <- rep(NA_real_, length(width))
 			val <- Delta[j,1]
@@ -2858,7 +2857,6 @@ function (fitted, delta = 0.05, number = 100, plot.it = TRUE, ...) {
 		cat("Factors may arbitrarily be plotted in a different order than they",
 			" appear in summary()\n")
 	}
-	jit(2) ## 2 seems safe here
 	for(p in 1:ncol(notfree)) for(j in 1:nrow(notfree)) if(notfree[j,p]) {
 		y <- x <- rep(NA_real_, length(width))
 		val <- Delta[j,p]

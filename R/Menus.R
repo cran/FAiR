@@ -159,7 +159,8 @@ function(x, level, choice_mr, choice_zeros){
 	if(choice_mr) answer <- FAiR_get_answer(text = text, radio_items = items)
 	else          answer <- items[1]
 	arg_list <- formals(mapping_rule)
-	arg_list[[names(arg_list) %in% names(which(items == answer))]] <- TRUE
+  mark <- names(arg_list) %in% names(which(items == answer))
+	if(any(mark)) arg_list[[mark]] <- TRUE
 	if(names(which(items == answer)) == "row_complexity") {
 		text <- paste("What complexity would you like to use for *most*",
 				"outcomes at level", level, "?")

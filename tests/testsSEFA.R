@@ -35,7 +35,7 @@ FAiR:::FAiR_stress_test(SEFA1_Harman74)
 ## personality example, also test DWLS
 library(psych); data(bfi)
 for(i in 1:ncol(bfi)) bfi[,i] <- factor(bfi[,i], ordered = TRUE)
-man <- make_manifest(bfi)
+man <- make_manifest(bfi[,1:25])
 order1 <- matrix(5, 25, 5)
 order2 <- matrix(25, 25, 5)
 
@@ -60,15 +60,15 @@ beta <- new("parameter.coef", x = fixed1, free = free, num_free = sum(free))
 res_bfi_CFA <- make_restrictions(manifest = man, beta = beta, Phi = Phi,
 				discrepancy = "ADF")
 
-set.seed(12345)
+#set.seed(12345)
 starts_CFA <- matrix(runif(1000 * 60, min = -.25, max = .25), nrow = 1000)
 CFA1_bfi <- Factanal(man, res_bfi_CFA, starting.values = starts_CFA)
-library(sem)
-RAM <- FA2RAM(CFA1_bfi)
-sem_CFA <- sem(RAM, model.matrix(man, standardized = FALSE), man@n.obs)
-summary(SEM_CFA)
-deviance(CFA1_bfi)
-FAiR:::FAiR_stress_test(CFA1_bfi)
+#library(sem)
+#RAM <- FA2RAM(CFA1_bfi)
+#sem_CFA <- sem(RAM, model.matrix(man, standardized = FALSE), man@n.obs)
+#summary(sem_CFA)
+#deviance(CFA1_bfi)
+#FAiR:::FAiR_stress_test(CFA1_bfi)
 
 #Phi <- cormat(CFA1_bfi)
 #beta <- loadings(CFA1_bfi)
@@ -86,7 +86,7 @@ starts_SEFA <- matrix(runif(1000 * res1_bfi@nvars, min = -.25, max = .25), nrow 
 starts_SEFA[1,] <- c(cormat(CFA1_bfi)[lower.tri(Phi@x)], coef(CFA1_bfi), log(CFA1_bfi@scale))
 SEFA1_bfi <- Factanal(man, res1_bfi, starting.values = starts_SEFA)
 summary(SEFA1_bfi)
-FAiR:::FAiR_stress_test(SEFA1_bfi)
+#FAiR:::FAiR_stress_test(SEFA1_bfi)
 
 ## Compare restrictions.general with restrictions.2ndorder
 fixed <- matrix(NA_real_, nrow = nrow(cormat(manifest_Harman74)), ncol = 4)
@@ -135,10 +135,10 @@ res3_Harman74@Domains[1:11,2] <-  .8
 set.seed(12345)
 starts <- matrix(runif(1000 * res3_Harman74@nvars, max = 0.25), nrow = 1000)
 SEFA3_Harman74 <- Factanal(manifest = manifest_Harman74, restrictions = res3_Harman74,
-				starting.values = starts, boundary.enforcement = 2)
+				starting.values = starts, boundary.enforcement = 1)
 RAM <- FA2RAM(SEFA3_Harman74)
 sem_SEFA <- sem(RAM, model.matrix(manifest_Harman74, standardized = FALSE), 
 				  manifest_Harman74@n.obs)
-summary(sem_SEFA)
+#summary(sem_SEFA)
 deviance(SEFA3_Harman74)
 FAiR:::FAiR_stress_test(SEFA3_Harman74)

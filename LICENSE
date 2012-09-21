@@ -3,6 +3,7 @@ The functions in the following files,
         FAiR/R/TestStatistics.R
         FAiR/R/GPLv3_or_later.R
         FAiR/R/GPArotation.R
+	FAiR/src/slot.c
 
 are licensed under the GNU General Public License version 3 (or at your option any 
 later version) because they contain modifications to code that is either licensed 
