@@ -1,4 +1,4 @@
-82aeb23ab7d672e896d26f467367ec62 *DESCRIPTION
+dc1e1d9baec0fe64808e3871e56e4080 *DESCRIPTION
 7504f2579b4c8c1424fccdc6d19957c3 *LICENSE
 cb9b8a5db1811999e9bf3d626f09b162 *NAMESPACE
 1785706da3679edcdc355aac0c8dc6f9 *NEWS
@@ -13,7 +13,7 @@ bcfb6bc4c4e08dd4e6a31f5aa0afd278 *R/GPLv3_or_later.R
 c2f3de9ebde883bfe4f6aaf104d977a8 *R/S4methods.R
 65ee45bfbda4fd19a457ef406ea8f75d *R/TestStatistics.R
 01675780d3b13a7101c51607341c8246 *R/Utils.R
-bfbd5af9c52e65f5161662480130eefa *R/zzz.R
+f11c27d9f9c7c335df4af9a736fefc2a *R/zzz.R
 e7f34367b33b366ecab311cc46c2acf5 *inst/doc/FAiR.Rnw
 d90f473c3796d5f76ee58ec8adf89d21 *man/00FAiR-package.Rd
 ca98f1d1e2568980c18e86397a571a01 *man/01make_manifest.Rd
@@ -39,7 +39,7 @@ f729108b08460972425c4d1cecfec0e0 *man/restrictions-class.Rd
 4d38bdb66867235cfaad6cd273dbaa62 *man/restrictions2draws.Rd
 1294992d35b00fda29d7252979d85973 *man/restrictions2model.Rd
 9b606503bdc9e0086169c65b4514328a *man/summary.FA-class.Rd
-9bd458aaefc91fc82c7d96e66e38b193 *src/ADF.c
+6f7b33d310d780ccc409e1bb2e5b38f8 *src/ADF.c
 7db90ddb6a98063e05217662f1cfb5a6 *src/slot.c
 653fba6301de7259fd91dc87a2bf4a09 *tests/testsCFA.R
 f05193e178d9a4ad7e2397c2f643949f *tests/testsEFA.R

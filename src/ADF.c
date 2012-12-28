@@ -1,5 +1,5 @@
 /*  This file is part of FAiR, a program to conduct Factor Analysis in R
-    Copyright 2008 Benjamin King Goodrich
+    Copyright 2008, 2012 Benjamin King Goodrich
 
     FAiR is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -28,9 +28,10 @@
 */
 		int count = 0;
 		double temp;
-		for(unsigned int i = 0; i < *length; ++i) {
+                unsigned int i, j;
+		for(i = 0; i < *length; ++i) {
 			temp = 0;
-			for(unsigned int j = i; j < *length; ++j) {
+			for(j = i; j < *length; ++j) {
 /*
 				matrix multiply x by a column of chol(W)'; since chol(W)'
 				is lower-triangular, we do fewer operations each pass
@@ -60,9 +61,10 @@
 		int count = 0;
 		int mark;
 		double temp;
-		for(unsigned int i = 0; i < *length; ++i) {
+                unsigned int i,j;
+		for(i = 0; i < *length; ++i) {
 			temp = 0;
-			for(unsigned int j = i; j < *length; ++j) {
+			for(j = i; j < *length; ++j) {
 /*
 				matrix multiply a row of chol(W) by x; since chol(W) is
 				upper-triangular, we do fewer operations each pass
@@ -74,7 +76,7 @@
 
 			temp = 0;
 			mark = i;
-			for(unsigned int j = 0; j <= i; ++j) {
+			for(j = 0; j <= i; ++j) {
 /*
 				matrix multiply a row of chol(W)' by holder; since
 				chol(W)' is lower-triangular we only have to go part way

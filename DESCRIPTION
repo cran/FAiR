@@ -1,8 +1,8 @@
 Package: FAiR
 Type: Package
 Title: Factor Analysis in R
-Version: 0.4-11
-Date: 2012-09-21
+Version: 0.4-12
+Date: 2012-12-28
 Author: Ben Goodrich
 Maintainer: Ben Goodrich <bgokGM@gmail.com>
 Description: This package estimates factor analysis models using a
@@ -33,6 +33,6 @@ Depends: R (>= 2.7.0), methods, rgenoud (>= 5.4-7), gWidgetsRGtk2 (>=
 Suggests: corpcor, mvnmle, polycor, nFactors, Rgraphviz, mvnormtest,
         energy, GPArotation, sem, MASS, psych
 LazyLoad: yes
-Packaged: 2012-09-21 07:10:05 UTC; goodrich
+Packaged: 2012-12-28 06:10:42 UTC; goodrich
 Repository: CRAN
-Date/Publication: 2012-09-21 08:32:18
+Date/Publication: 2012-12-28 15:57:00

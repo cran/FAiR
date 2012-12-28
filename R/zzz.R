@@ -54,12 +54,6 @@ else if (.Platform$OS.type == "windows") {
 	flush.console()
 }
 
-## Hack to run on R < 2.6.0 (maybe not necessary anymore)
-if( (as.numeric(R.version$minor) < 6.0) | (as.numeric(R.version$minor) < 2) ) {
-	warning("FAiR is not tested on this version of R but may work sufficiently.\n",
-		"For best results, use R version 2.7.0 or later.\n")
-}
-
 invisible(NULL)
 }
 
