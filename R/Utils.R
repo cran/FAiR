@@ -1,5 +1,5 @@
 #     This file is part of FAiR, a program to conduct Factor Analysis in R
-#     Copyright 2008 Benjamin King Goodrich
+#     Copyright 2008,2013 Benjamin King Goodrich
 #
 #     FAiR is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU Affero General Public License as published by
@@ -658,7 +658,7 @@ function(par, restrictions, manifest, helper, lower) {
 	assign("helper", helper, envir = gradient.env)
 	assign("manifest", manifest, envir = gradient.env)
 	assign("lower", lower, envir = gradient.env)
-	gradient <- as.real(attr(numericDeriv(quote(bfgs_fitS4(par, restrictions,
+	gradient <- as.double(attr(numericDeriv(quote(bfgs_fitS4(par, restrictions,
 			manifest, helper, lower)), 
 			theta = c("par"), gradient.env), "gradient"))
 	return(gradient)

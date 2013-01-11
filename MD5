@@ -1,4 +1,4 @@
-dc1e1d9baec0fe64808e3871e56e4080 *DESCRIPTION
+017d36be5e6d2f603668e249f40c24f8 *DESCRIPTION
 7504f2579b4c8c1424fccdc6d19957c3 *LICENSE
 cb9b8a5db1811999e9bf3d626f09b162 *NAMESPACE
 1785706da3679edcdc355aac0c8dc6f9 *NEWS
@@ -12,9 +12,11 @@ bcfb6bc4c4e08dd4e6a31f5aa0afd278 *R/GPLv3_or_later.R
 50c11ca72ee93b1db9d4818a088869f0 *R/S3methods.R
 c2f3de9ebde883bfe4f6aaf104d977a8 *R/S4methods.R
 65ee45bfbda4fd19a457ef406ea8f75d *R/TestStatistics.R
-01675780d3b13a7101c51607341c8246 *R/Utils.R
+65da30c25d8c082141459d3be94107e6 *R/Utils.R
 f11c27d9f9c7c335df4af9a736fefc2a *R/zzz.R
+ac0e88bc8e25e65606857ca423774471 *inst/doc/FAiR.R
 e7f34367b33b366ecab311cc46c2acf5 *inst/doc/FAiR.Rnw
+9b9903e850c0864993bc2966751dbe2b *inst/doc/FAiR.pdf
 d90f473c3796d5f76ee58ec8adf89d21 *man/00FAiR-package.Rd
 ca98f1d1e2568980c18e86397a571a01 *man/01make_manifest.Rd
 916df803484ef5fe3a48106806e7db91 *man/02make_restrictions.Rd
@@ -47,6 +49,7 @@ f05193e178d9a4ad7e2397c2f643949f *tests/testsEFA.R
 c7173fe305dad26406157cc0ddd8269a *tests/testsMICRO.R
 970288dc6a6223b096c14752381fda21 *tests/testsRESTRICTIONS.R
 acd0feb9109cbab9e19b5dc3e6b60d83 *tests/testsSEFA.R
+e7f34367b33b366ecab311cc46c2acf5 *vignettes/FAiR.Rnw
 75873b3a138a8a481532c844ef050e9d *vignettes/screenshots2/EFA/algorithm.png
 9eb9147e0bfb234ff0e7cc0517336856 *vignettes/screenshots2/EFA/c.png
 4d26fc648f6be87d262a71bfbf4edb56 *vignettes/screenshots2/EFA/criteria1.png
