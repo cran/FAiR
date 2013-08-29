@@ -17,6 +17,8 @@ importFrom(stats, fitted, residuals, rstandard, model.matrix, simulate,
 # From stats4
 importFrom(stats4, logLik, coef, vcov, plot, confint, profile, summary)
 
+import(gWidgetsRGtk2, methods, rgenoud)
+
 # From FAiR
 # Compiled code thing
 useDynLib(FAiR, FAiR_QD_sum, FAiR_QD_grad)

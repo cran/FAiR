@@ -3210,7 +3210,7 @@ function(object) {
 		fixed[upper.tri(fixed)] <- 0
 		diag(fixed) <- 1
 		cat("Fixed elements of the factor correlation matrix\n")
-		FAiR:::FAiR_print.loadings(fixed)
+		FAiR_print.loadings(fixed)
 	}
 })
 

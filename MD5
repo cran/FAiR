@@ -1,6 +1,6 @@
-017d36be5e6d2f603668e249f40c24f8 *DESCRIPTION
+955df3c1652d18c24f5a9e7ba7092eb9 *DESCRIPTION
 7504f2579b4c8c1424fccdc6d19957c3 *LICENSE
-cb9b8a5db1811999e9bf3d626f09b162 *NAMESPACE
+ff791e143fa640eea1d96fda7992266b *NAMESPACE
 1785706da3679edcdc355aac0c8dc6f9 *NEWS
 acd054727e67777d108156b0f09a3717 *R/AllS4Generics.R
 fe97db52472c1f3ee22d0aa69ab588c3 *R/Classes.R
@@ -10,7 +10,7 @@ f44e31d4f7f94863f7fbe9ee70272bc6 *R/GPArotation.R
 bcfb6bc4c4e08dd4e6a31f5aa0afd278 *R/GPLv3_or_later.R
 6f38e721a2b38bae7fb595fb56a211eb *R/Menus.R
 50c11ca72ee93b1db9d4818a088869f0 *R/S3methods.R
-c2f3de9ebde883bfe4f6aaf104d977a8 *R/S4methods.R
+cd5d141cdf50caa583cf2e0c9b1bafe1 *R/S4methods.R
 65ee45bfbda4fd19a457ef406ea8f75d *R/TestStatistics.R
 65da30c25d8c082141459d3be94107e6 *R/Utils.R
 f11c27d9f9c7c335df4af9a736fefc2a *R/zzz.R
@@ -19,7 +19,7 @@ e7f34367b33b366ecab311cc46c2acf5 *inst/doc/FAiR.Rnw
 9b9903e850c0864993bc2966751dbe2b *inst/doc/FAiR.pdf
 d90f473c3796d5f76ee58ec8adf89d21 *man/00FAiR-package.Rd
 ca98f1d1e2568980c18e86397a571a01 *man/01make_manifest.Rd
-916df803484ef5fe3a48106806e7db91 *man/02make_restrictions.Rd
+2d7cf793e1b68dfd3dee7fd1544b6117 *man/02make_restrictions.Rd
 4dc9a126cf5deb18b397e97b1d6c54ed *man/03Factanal.Rd
 556f5eee3b9bcc53191463bf83b9dc6e *man/04Rotate.Rd
 806583803e2356839528ef34e12adc37 *man/FAiR-internal.Rd

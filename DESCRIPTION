@@ -1,10 +1,10 @@
 Package: FAiR
 Type: Package
 Title: Factor Analysis in R
-Version: 0.4-13
-Date: 2013-01-11
+Version: 0.4-14
+Date: 2013-08-29
 Author: Ben Goodrich
-Maintainer: Ben Goodrich <bgokGM@gmail.com>
+Maintainer: Ben Goodrich <bgokgm@gmail.com>
 Description: This package estimates factor analysis models using a
         genetic algorithm, which permits a general mechanism for
         restricted optimization with arbitrary restrictions that are
@@ -26,14 +26,12 @@ Description: This package estimates factor analysis models using a
 URL: http://wiki.r-project.org/rwiki/doku.php?id=packages:cran:fair
 License: AGPL (>= 3) + file LICENSE
 Encoding: UTF-8
-Imports: stats4, rrcov
-Enhances: stats4, rrcov
 Depends: R (>= 2.7.0), methods, rgenoud (>= 5.4-7), gWidgetsRGtk2 (>=
         0.0-31), stats4, rrcov, Matrix
 Suggests: corpcor, mvnmle, polycor, nFactors, Rgraphviz, mvnormtest,
         energy, GPArotation, sem, MASS, psych
 LazyLoad: yes
-Packaged: 2013-08-27 07:42:28 UTC; hornik
+Packaged: 2013-08-30 05:40:48 UTC; goodrich
 Repository: CRAN
-Date/Publication: 2013-08-27 09:48:02
+Date/Publication: 2013-08-30 19:25:59
 NeedsCompilation: yes

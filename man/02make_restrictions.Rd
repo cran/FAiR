@@ -44,45 +44,25 @@ discrepancy = "default", nl_1 = NULL, nl_2 = NULL)
 # USE THE ABOVE METHOD IN MOST CASES!!! 
 # USE ONE OF THE FOLLOWING METHODS IN SIMULATIONS, ETC.
 
-\S4method{make_restrictions}{manifest.basic,parameter.scale,missing,missing,missing,missing}(
-manifest, Omega, discrepancy = "default")
+# Model                 | Omega | beta | Phi | Delta | Xi  
+# ---------------------------------------------------------
+# 0 common factors      |   X   |      |     |       |
+# EFA                   |       |   X  |     |       |
+# Correlated factors    |       |   X  |  X  |       |
+# Correlated factors    |   X   |   X  |  X  |       |
+# 1 second-order factor |       |   X  |     |   X   |
+# 1 second-order factor |   X   |   X  |     |   X   |
+# Second-order factors  |       |   X  |     |   X   | X
+# Second-order factors  |   X   |   X  |     |   X   | X
 
-# Above method implies zero common factors
-
-\S4method{make_restrictions}{manifest.basic,missing,parameter.coef,missing,missing,missing}(
-manifest, beta, discrepancy = "default")
-
-# Above method implies EFA with orthogonal factors
-
-\S4method{make_restrictions}{manifest.basic,missing,parameter.coef,parameter.cormat,missing,missing}(
-manifest, beta, Phi, discrepancy = "default", 
-criteria = list(), methodArgs = list())
-
-# Adjacent methods imply correlated factors
-
-\S4method{make_restrictions}{manifest.basic,parameter.scale,parameter.coef,parameter.cormat,missing,missing}(
-manifest, Omega, beta, Phi, discrepancy = "default", 
-criteria = list(), methodArgs = list())
-
-\S4method{make_restrictions}{manifest.basic,missing,parameter.coef,missing,parameter.coef,missing}(
-manifest, beta, Delta, discrepancy = "default", 
-criteria = list(), methodArgs = list())
-
-# Adjacent methods imply one second-order factor
-
-\S4method{make_restrictions}{manifest.basic,parameter.scale,parameter.coef,missing,parameter.coef,missing}(
-manifest, Omega, beta, Delta, discrepancy = "default", 
-criteria = list(), methodArgs = list())
-
-\S4method{make_restrictions}{manifest.basic,missing,parameter.coef,missing,parameter.coef,parameter.cormat}(
-manifest, beta, Delta, Xi, discrepancy = "default", 
-criteria = list(), methodArgs = list())
-
-# Adjacent methods imply multiple second-order factors
-
-\S4method{make_restrictions}{manifest.basic,parameter.scale,parameter.coef,missing,parameter.coef,parameter.cormat}(
-manifest, Omega, beta, Delta, Xi, discrepancy = "default", 
-criteria = list(), methodArgs = list())
+# An X indicates that the argument named by the column is specified
+# No X indicates that the argument named by the column is missing
+# All take an object that inherits from the manifest.basic class as the first argument
+# In addition, there are two arguments that are not part of the signature:
+# criteria -- either NULL or a list (possibly of length zero) of functions or character 
+#   strings naming functions to be used as criteria in the lexical optimization process.
+# methodArgs -- a list (possibly of length zero) of required arguments to the functions
+#   listed in the criteria argument.
 }
 \arguments{
   \item{manifest}{a \emph{required} object that inherits from \code{\link{manifest.basic-class}}}
@@ -105,11 +85,6 @@ criteria = list(), methodArgs = list())
   \item{nl\_2}{either \code{NULL} or a function with an argument called \code{x} that imposes
      nonlinear exact restrictions on some cells of the primary pattern matrix at level two. See the 
      Details section.}
-  \item{criteria}{either \code{NULL} or a list (possibly of length zero) of functions or
-     character strings naming functions to be used as criteria in the lexical optimization process.
-     See the Note section.}
-  \item{methodArgs}{a list (possibly of length zero) of required arguments to the functions
-     listed in the \code{criteria} argument. See the Note section.}
 }
 \details{
 Let the factor analysis model in the population be
