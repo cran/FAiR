@@ -1,9 +1,9 @@
-955df3c1652d18c24f5a9e7ba7092eb9 *DESCRIPTION
+32d845a33738528c9af659bf80a39642 *DESCRIPTION
 7504f2579b4c8c1424fccdc6d19957c3 *LICENSE
 ff791e143fa640eea1d96fda7992266b *NAMESPACE
 1785706da3679edcdc355aac0c8dc6f9 *NEWS
 acd054727e67777d108156b0f09a3717 *R/AllS4Generics.R
-fe97db52472c1f3ee22d0aa69ab588c3 *R/Classes.R
+7f1dd8ee7b3c99ef68db4e7b6fa3770c *R/Classes.R
 a9b3a4cedff1d0036cb01ce4c36eb89c *R/Criteria.R
 29b6c66db59d2cf6f0e59bd5fee1dcd8 *R/FAiR.R
 f44e31d4f7f94863f7fbe9ee70272bc6 *R/GPArotation.R
@@ -14,7 +14,7 @@ cd5d141cdf50caa583cf2e0c9b1bafe1 *R/S4methods.R
 65ee45bfbda4fd19a457ef406ea8f75d *R/TestStatistics.R
 65da30c25d8c082141459d3be94107e6 *R/Utils.R
 f11c27d9f9c7c335df4af9a736fefc2a *R/zzz.R
-ac0e88bc8e25e65606857ca423774471 *inst/doc/FAiR.R
+48608cc66183f5fba8e47dd30fb62c51 *build/vignette.rds
 e7f34367b33b366ecab311cc46c2acf5 *inst/doc/FAiR.Rnw
 9b9903e850c0864993bc2966751dbe2b *inst/doc/FAiR.pdf
 d90f473c3796d5f76ee58ec8adf89d21 *man/00FAiR-package.Rd

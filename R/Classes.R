@@ -1301,7 +1301,7 @@ function(object) {
 	}
 	else if(factors == 1) return(out)
 	else if(!isTRUE(all.equal(primary <- object@trans_mats[,,"primary"], 
-			  t(solve(object@trans_mats[,,"T"])), check.attributes = 0))) {
+			  t(solve(object@trans_mats[,,"T"])), check.attributes = FALSE))) {
 		out <- paste("transformation matrix for the primary factors must equal",
 				"the transpose of the inverse of the T matrix")
 	}
